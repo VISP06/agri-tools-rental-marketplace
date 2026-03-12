@@ -2,6 +2,6 @@
 
 ### 👥 The Dream Team
 * **Goutham** 
-* **Vishruth** 
+* **Vishruth P** 
 * **Shubham Sheelvant** 
-* **Suhas DT** 
+* **Suhas D T** 
