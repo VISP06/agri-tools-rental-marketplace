@@ -93,8 +93,14 @@ const listEquipmentPage = () => `
         </label>
 
         <label class="flex flex-col gap-2 text-sm">
-          <span class="font-medium text-slate-700">Hourly Rate (INR)</span>
-          <input class="rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20" name="hourlyRate" type="number" min="0" required />
+          <span class="font-medium text-slate-700">Equipment Image</span>
+          <div id="image-drop-zone" class="relative flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate-300 px-3 py-6 cursor-pointer hover:border-emerald-500 hover:bg-emerald-50/30 transition-colors">
+            <svg class="h-8 w-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/></svg>
+            <p class="mt-2 text-sm text-slate-500">Click or drag & drop to upload</p>
+            <p class="mt-1 text-xs text-slate-400">PNG, JPG up to 5MB</p>
+            <input class="absolute inset-0 cursor-pointer opacity-0" name="image" type="file" accept="image/*" />
+            <img id="image-preview" class="mt-3 hidden max-h-32 rounded-lg object-cover" alt="Preview" />
+          </div>
         </label>
 
         <label class="flex flex-col gap-2 text-sm">

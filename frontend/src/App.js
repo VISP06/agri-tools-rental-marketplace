@@ -70,19 +70,34 @@ const initApp = (rootElement) => {
     event.preventDefault();
     const formData = new FormData(event.target);
 
+    const imageFile = formData.get("image");
+    let imageBase64 = "";
+    if (imageFile && imageFile.size > 0) {
+      imageBase64 = await new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = (e) => resolve(e.target.result);
+        reader.readAsDataURL(imageFile);
+      });
+    }
+
     const payload = {
       ownerName: formData.get("ownerName"),
       name: formData.get("name"),
       category: formData.get("category"),
       location: formData.get("location"),
       description: formData.get("description"),
-      hourlyRate: Number(formData.get("hourlyRate")),
-      dailyRate: Number(formData.get("dailyRate"))
+      dailyRate: Number(formData.get("dailyRate")),
+      images: imageBase64 ? [imageBase64] : []
     };
 
     try {
       await createEquipment(payload);
       event.target.reset();
+      const preview = document.getElementById("image-preview");
+      if (preview) {
+        preview.classList.add("hidden");
+        preview.src = "";
+      }
       setState({ activePage: "marketplace" });
       await fetchEquipment();
       window.alert("Equipment listed successfully.");
@@ -242,6 +257,22 @@ const initApp = (rootElement) => {
     if (state.activePage === "list-equipment") {
       const form = document.getElementById("add-equipment-form");
       if (form) form.addEventListener("submit", handleEquipmentSubmit);
+
+      const imageInput = form && form.querySelector('input[name="image"]');
+      const imagePreview = document.getElementById("image-preview");
+      if (imageInput) {
+        imageInput.addEventListener("change", (e) => {
+          const file = e.target.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+              imagePreview.src = ev.target.result;
+              imagePreview.classList.remove("hidden");
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+      }
     }
 
     if (state.activePage === "contact") {

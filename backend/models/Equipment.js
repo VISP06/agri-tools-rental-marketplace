@@ -43,7 +43,7 @@ const equipmentSchema = new mongoose.Schema(
     },
     hourlyRate: {
       type: Number,
-      required: true,
+      default: 0,
       min: 0
     },
     dailyRate: {
