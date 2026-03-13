@@ -73,21 +73,21 @@ const homePage = ({ loading, error, equipment }) => {
         <div class="absolute -top-24 -right-24 h-96 w-96 rounded-full bg-emerald-400 blur-3xl"></div>
         <div class="absolute -bottom-24 -left-24 h-96 w-96 rounded-full bg-emerald-300 blur-3xl"></div>
       </div>
-      <div class="relative z-10 max-w-2xl">
+      <div class="relative z-10 mx-auto max-w-3xl text-center">
         <span class="inline-block rounded-full bg-emerald-500/20 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-emerald-300 border border-emerald-500/30">
           Trusted by 2,000+ Farmers
         </span>
-        <h1 class="mt-4 text-3xl font-extrabold leading-tight md:text-5xl">
+        <h1 class="mt-6 text-4xl font-extrabold tracking-tight leading-tight md:text-5xl lg:text-6xl" style="font-family: 'Roboto', sans-serif;">
           Rent Quality Farm Equipment Across India
         </h1>
-        <p class="mt-4 text-base text-emerald-100/80 md:text-lg">
+        <p class="mt-6 text-lg text-emerald-100/80 md:text-xl max-w-2xl mx-auto" style="font-family: 'Roboto', sans-serif;">
           Access tractors, harvesters, irrigation systems, and more at affordable rental rates. No need to buy expensive machinery — just rent what you need, when you need it.
         </p>
-        <div class="mt-8 flex flex-wrap gap-3">
-          <button id="hero-browse" class="rounded-lg bg-white px-6 py-3 text-sm font-semibold text-emerald-800 shadow-lg hover:bg-emerald-50 transition-colors">
+        <div class="mt-10 flex flex-wrap justify-center gap-4">
+          <button id="hero-browse" class="rounded-lg bg-white px-8 py-4 text-base font-semibold text-emerald-800 shadow-lg hover:bg-emerald-50 transition-all hover:shadow-xl hover:-translate-y-0.5">
             Browse Equipment
           </button>
-          <button id="hero-list" class="rounded-lg border-2 border-emerald-400/50 px-6 py-3 text-sm font-semibold text-white hover:bg-emerald-700/50 transition-colors">
+          <button id="hero-list" class="rounded-lg border-2 border-emerald-400/50 px-8 py-4 text-base font-semibold text-white hover:bg-emerald-700/50 transition-all hover:border-emerald-400">
             List Your Equipment
           </button>
         </div>
