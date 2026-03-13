@@ -177,6 +177,8 @@ const listEquipmentPage = () => `
       </div>
     </div>
   </section>
+  
+
 `;
 
 export { listEquipmentPage };

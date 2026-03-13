@@ -1,6 +1,72 @@
 import { equipmentCard } from "../components/EquipmentCard.js";
 
+// Sample equipment data for demonstration
+const sampleEquipment = [
+  {
+    _id: "demo1",
+    name: "Mahindra 575 DI",
+    category: "Tractor",
+    location: "Pune, Maharashtra",
+    description: "45 HP tractor, well maintained, suitable for ploughing and harvesting.",
+    hourlyRate: 500,
+    dailyRate: 3500,
+    ownerName: "Prakash Patil"
+  },
+  {
+    _id: "demo2",
+    name: "John Deere 5105",
+    category: "Tractor",
+    location: "Nashik, Maharashtra",
+    description: "50 HP tractor with cabin, perfect for large farms.",
+    hourlyRate: 600,
+    dailyRate: 4000,
+    ownerName: "Rajendra Singh"
+  },
+  {
+    _id: "demo3",
+    name: "New Holland 3110",
+    category: "Harvester",
+    location: "Ahmednagar, Maharashtra",
+    description: "Combine harvester for wheat and paddy, operator included.",
+    hourlyRate: 750,
+    dailyRate: 5000,
+    ownerName: "Vijay Mohite"
+  },
+  {
+    _id: "demo4",
+    name: "Kirloskar Sprayer",
+    category: "Sprayer",
+    location: "Solapur, Maharashtra",
+    description: "Power sprayer for pesticide and fertilizer application.",
+    hourlyRate: 200,
+    dailyRate: 1200,
+    ownerName: "Santosh Jadhav"
+  },
+  {
+    _id: "demo5",
+    name: "Landmaster Plough",
+    category: "Plough",
+    location: "Kolhapur, Maharashtra",
+    description: "Disc plough for primary tillage, 3-bottom.",
+    hourlyRate: 300,
+    dailyRate: 2000,
+    ownerName: "Dhanraj Gore"
+  },
+  {
+    _id: "demo6",
+    name: "Agri Drone Spray",
+    category: "Drone",
+    location: "Pune, Maharashtra",
+    description: "Agricultural drone for precision spraying, 10L tank capacity.",
+    hourlyRate: 800,
+    dailyRate: 5500,
+    ownerName: "TechFarm Solutions"
+  }
+];
+
 const homePage = ({ loading, error, equipment }) => {
+  // Use sample equipment if no data from API
+  const displayEquipment = equipment.length > 0 ? equipment : sampleEquipment;
   const heroSection = `
     <section class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-700 via-emerald-800 to-slate-900 px-6 py-16 text-white md:px-12 md:py-24">
       <div class="absolute inset-0 opacity-10">
@@ -33,23 +99,29 @@ const homePage = ({ loading, error, equipment }) => {
     <section class="relative -mt-7 z-20 mx-4 md:mx-8">
       <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-lg md:p-6">
         <form id="search-form" class="grid gap-3 md:grid-cols-4">
-          <div>
+          <div class="relative">
             <label class="text-xs font-medium text-slate-500">Search Equipment</label>
-            <input
-              type="text"
-              name="search"
-              placeholder="Tractor, Harvester, Drone..."
-              class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
-            />
+            <div class="relative">
+              <svg class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              <input
+                type="text"
+                name="search"
+                placeholder="Tractor, Harvester, Drone..."
+                class="mt-1 w-full rounded-lg border border-slate-300 py-2.5 pl-10 pr-3 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+              />
+            </div>
           </div>
-          <div>
+          <div class="relative">
             <label class="text-xs font-medium text-slate-500">Location</label>
-            <input
-              type="text"
-              name="location"
-              placeholder="District, State..."
-              class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
-            />
+            <div class="relative">
+              <svg class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+              <input
+                type="text"
+                name="location"
+                placeholder="District, State..."
+                class="mt-1 w-full rounded-lg border border-slate-300 py-2.5 pl-10 pr-3 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+              />
+            </div>
           </div>
           <div>
             <label class="text-xs font-medium text-slate-500">Category</label>
@@ -229,7 +301,7 @@ const homePage = ({ loading, error, equipment }) => {
         </div>
       </section>
     `;
-  } else if (!equipment.length) {
+  } else if (!displayEquipment.length) {
     listingsSection = `
       <section class="mt-16">
         <h2 class="text-2xl font-bold text-slate-900 md:text-3xl">Featured Equipment</h2>
@@ -253,12 +325,12 @@ const homePage = ({ loading, error, equipment }) => {
           </button>
         </div>
         <div class="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          ${equipment.slice(0, 6).map((item) => equipmentCard(item)).join("")}
+          ${displayEquipment.slice(0, 6).map((item) => equipmentCard(item)).join("")}
         </div>
-        ${equipment.length > 6 ? `
+        ${displayEquipment.length > 6 ? `
           <div class="mt-6 text-center">
             <button id="view-all-equipment-bottom" class="rounded-lg border border-slate-300 px-6 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
-              View All ${equipment.length} Listings
+              View All ${displayEquipment.length} Listings
             </button>
           </div>
         ` : ""}
