@@ -56,5 +56,17 @@ const registerUser = async (userId) =>
     body: JSON.stringify({ userId })
   });
 
-export { getEquipmentList, createEquipment, createBooking, loginUser, registerUser };
+const deleteEquipment = async (id, ownerId) =>
+  request(`/equipment/${id}`, {
+    method: "DELETE",
+    body: JSON.stringify({ ownerId })
+  });
+
+const rateEquipment = async (id, userId, rating) =>
+  request(`/equipment/${id}/rate`, {
+    method: "POST",
+    body: JSON.stringify({ userId, rating })
+  });
+
+export { getEquipmentList, createEquipment, createBooking, loginUser, registerUser, deleteEquipment, rateEquipment };
 

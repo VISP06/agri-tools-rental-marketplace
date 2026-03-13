@@ -26,12 +26,19 @@ const getEquipments = async (req, res, next) => {
     sql += " ORDER BY createdAt DESC";
 
     const rows = db.prepare(sql).all(...params);
-    const equipments = rows.map((row) => ({
-      ...row,
-      _id: row.id,
-      images: JSON.parse(row.images || "[]"),
-      isActive: Boolean(row.isActive)
-    }));
+    const equipments = rows.map((row) => {
+      const ratingData = db.prepare("SELECT AVG(rating) as avgRating, COUNT(*) as totalRatings FROM ratings WHERE equipmentId = ?").get(row.id);
+      return {
+        ...row,
+        _id: row.id,
+        images: JSON.parse(row.images || "[]"),
+        isActive: Boolean(row.isActive),
+        avgRating: ratingData.avgRating ? Math.round(ratingData.avgRating * 10) / 10 : 0,
+        totalRatings: ratingData.totalRatings || 0
+      };
+    });
+
+    equipments.sort((a, b) => b.avgRating - a.avgRating);
 
     res.status(200).json({ success: true, count: equipments.length, data: equipments });
   } catch (error) {
@@ -50,7 +57,12 @@ const getEquipmentById = async (req, res, next) => {
       throw error;
     }
 
-    const equipment = { ...row, _id: row.id, images: JSON.parse(row.images || "[]"), isActive: Boolean(row.isActive) };
+    const ratingData = db.prepare("SELECT AVG(rating) as avgRating, COUNT(*) as totalRatings FROM ratings WHERE equipmentId = ?").get(row.id);
+    const equipment = {
+      ...row, _id: row.id, images: JSON.parse(row.images || "[]"), isActive: Boolean(row.isActive),
+      avgRating: ratingData.avgRating ? Math.round(ratingData.avgRating * 10) / 10 : 0,
+      totalRatings: ratingData.totalRatings || 0
+    };
     res.status(200).json({ success: true, data: equipment });
   } catch (error) {
     next(error);
@@ -113,4 +125,82 @@ const updateEquipment = async (req, res, next) => {
   }
 };
 
-module.exports = { getEquipments, getEquipmentById, createEquipment, updateEquipment };
+const deleteEquipment = async (req, res, next) => {
+  try {
+    const db = getDb();
+    const row = db.prepare("SELECT * FROM equipment WHERE id = ?").get(req.params.id);
+
+    if (!row) {
+      const error = new Error("Equipment not found");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    const { ownerId } = req.body;
+    if (!ownerId || row.ownerId !== ownerId) {
+      const error = new Error("You can only delete your own equipment");
+      error.statusCode = 403;
+      throw error;
+    }
+
+    db.prepare("DELETE FROM equipment WHERE id = ?").run(req.params.id);
+    res.status(200).json({ success: true, message: "Equipment deleted" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const rateEquipment = async (req, res, next) => {
+  try {
+    const db = getDb();
+    const { userId, rating } = req.body;
+    const equipmentId = req.params.id;
+
+    if (!userId) {
+      const error = new Error("You must be logged in to rate");
+      error.statusCode = 401;
+      throw error;
+    }
+
+    if (!rating || rating < 1 || rating > 5) {
+      const error = new Error("Rating must be between 1 and 5");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    const equipment = db.prepare("SELECT * FROM equipment WHERE id = ?").get(equipmentId);
+    if (!equipment) {
+      const error = new Error("Equipment not found");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    if (equipment.ownerId === userId) {
+      const error = new Error("You cannot rate your own equipment");
+      error.statusCode = 403;
+      throw error;
+    }
+
+    const existing = db.prepare("SELECT * FROM ratings WHERE equipmentId = ? AND userId = ?").get(equipmentId, userId);
+    if (existing) {
+      db.prepare("UPDATE ratings SET rating = ? WHERE equipmentId = ? AND userId = ?").run(rating, equipmentId, userId);
+    } else {
+      db.prepare("INSERT INTO ratings (equipmentId, userId, rating) VALUES (?, ?, ?)").run(equipmentId, userId, rating);
+    }
+
+    const avg = db.prepare("SELECT AVG(rating) as avgRating, COUNT(*) as totalRatings FROM ratings WHERE equipmentId = ?").get(equipmentId);
+
+    res.status(200).json({
+      success: true,
+      data: {
+        avgRating: Math.round(avg.avgRating * 10) / 10,
+        totalRatings: avg.totalRatings,
+        userRating: rating
+      }
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { getEquipments, getEquipmentById, createEquipment, updateEquipment, deleteEquipment, rateEquipment };

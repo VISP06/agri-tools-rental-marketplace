@@ -1,6 +1,18 @@
 import { equipmentCard } from "../components/EquipmentCard.js";
+import { categoryDropdown } from "../components/CategoryDropdown.js";
 
-const homePage = ({ loading, error, equipment }) => {
+const searchCategories = [
+  { value: "", label: "All Categories" },
+  { value: "Tractor", label: "Tractors" },
+  { value: "Harvester", label: "Harvesters" },
+  { value: "Irrigation", label: "Irrigation Systems" },
+  { value: "Drone", label: "Agricultural Drones" },
+  { value: "Plough", label: "Ploughs & Tillers" },
+  { value: "Sprayer", label: "Sprayers" },
+  { value: "Other", label: "Other" },
+];
+
+const homePage = ({ loading, error, equipment, loggedInUser }) => {
   const heroSection = `
     <section class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-700 via-emerald-800 to-slate-900 px-6 py-16 text-white md:px-12 md:py-24">
       <div class="absolute inset-0 opacity-10">
@@ -33,10 +45,11 @@ const homePage = ({ loading, error, equipment }) => {
     <section class="relative -mt-7 z-20 mx-4 md:mx-8">
       <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-lg md:p-6">
         <form id="search-form" class="grid gap-3 md:grid-cols-4">
-          <div>
+          <div class="relative">
             <label class="text-xs font-medium text-slate-500">Search Equipment</label>
             <input
               type="text"
+              id="smart-search-input-home"
               name="search"
               placeholder="Tractor, Harvester, Drone..."
               class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
@@ -53,19 +66,9 @@ const homePage = ({ loading, error, equipment }) => {
           </div>
           <div>
             <label class="text-xs font-medium text-slate-500">Category</label>
-            <select
-              name="category"
-              class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
-            >
-              <option value="">All Categories</option>
-              <option value="Tractor">Tractors</option>
-              <option value="Harvester">Harvesters</option>
-              <option value="Irrigation">Irrigation Systems</option>
-              <option value="Drone">Agricultural Drones</option>
-              <option value="Plough">Ploughs & Tillers</option>
-              <option value="Sprayer">Sprayers</option>
-              <option value="Other">Other</option>
-            </select>
+            <div class="mt-1">
+              ${categoryDropdown("category", searchCategories)}
+            </div>
           </div>
           <div class="flex items-end">
             <button type="submit" class="w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 transition-colors">
@@ -253,7 +256,7 @@ const homePage = ({ loading, error, equipment }) => {
           </button>
         </div>
         <div class="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          ${equipment.slice(0, 6).map((item) => equipmentCard(item)).join("")}
+          ${equipment.slice(0, 6).map((item) => equipmentCard(item, loggedInUser)).join("")}
         </div>
         ${equipment.length > 6 ? `
           <div class="mt-6 text-center">

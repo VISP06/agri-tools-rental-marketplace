@@ -48,6 +48,16 @@ const initDatabase = () => {
       updatedAt TEXT DEFAULT (datetime('now')),
       FOREIGN KEY (equipmentId) REFERENCES equipment(id)
     );
+
+    CREATE TABLE IF NOT EXISTS ratings (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      equipmentId INTEGER NOT NULL,
+      userId TEXT NOT NULL,
+      rating INTEGER NOT NULL CHECK(rating >= 1 AND rating <= 5),
+      createdAt TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (equipmentId) REFERENCES equipment(id) ON DELETE CASCADE,
+      UNIQUE(equipmentId, userId)
+    );
   `);
 
   return db;

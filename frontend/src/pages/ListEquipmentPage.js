@@ -1,3 +1,17 @@
+import { categoryDropdown } from "../components/CategoryDropdown.js";
+
+const listCategories = [
+  { value: "", label: "Select a category" },
+  { value: "Tractor", label: "Tractor" },
+  { value: "Harvester", label: "Harvester" },
+  { value: "Irrigation", label: "Irrigation System" },
+  { value: "Drone", label: "Agricultural Drone" },
+  { value: "Plough", label: "Plough / Tiller" },
+  { value: "Sprayer", label: "Sprayer" },
+  { value: "Seeder", label: "Seeder / Planter" },
+  { value: "Other", label: "Other" },
+];
+
 const listEquipmentPage = () => `
   <section class="mt-4 grid gap-6 lg:grid-cols-3">
     <article class="rounded-xl border border-slate-200 bg-white p-8 shadow-sm lg:col-span-2">
@@ -17,20 +31,10 @@ const listEquipmentPage = () => `
           <input class="rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20" name="name" required />
         </label>
 
-        <label class="flex flex-col gap-2 text-sm">
+        <div class="flex flex-col gap-2 text-sm">
           <span class="font-medium text-slate-700">Category</span>
-          <select class="rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20" name="category" required>
-            <option value="">Select a category</option>
-            <option value="Tractor">Tractor</option>
-            <option value="Harvester">Harvester</option>
-            <option value="Irrigation">Irrigation System</option>
-            <option value="Drone">Agricultural Drone</option>
-            <option value="Plough">Plough / Tiller</option>
-            <option value="Sprayer">Sprayer</option>
-            <option value="Seeder">Seeder / Planter</option>
-            <option value="Other">Other</option>
-          </select>
-        </label>
+          ${categoryDropdown("category", listCategories, "Select a category")}
+        </div>
 
         <label class="flex flex-col gap-2 text-sm">
           <span class="font-medium text-slate-700">Location</span>

@@ -8,9 +8,11 @@ import { contactPage } from "./pages/ContactPage.js";
 import { loginPage } from "./pages/LoginPage.js";
 import { registerPage } from "./pages/RegisterPage.js";
 import { profilePage } from "./pages/ProfilePage.js";
+import { equipmentDetailPage } from "./pages/EquipmentDetailPage.js";
 
-import { getEquipmentList, createEquipment, createBooking, loginUser, registerUser } from "./services/api.js";
+import { getEquipmentList, createEquipment, createBooking, loginUser, registerUser, deleteEquipment, rateEquipment } from "./services/api.js";
 import { initSmartSearch } from "./utils/smartSearch.js";
+import { initCategoryDropdowns } from "./components/CategoryDropdown.js";
 
 
 const initApp = (rootElement) => {
@@ -24,7 +26,9 @@ const initApp = (rootElement) => {
     equipment: [],
     loading: false,
     error: "",
-    loggedInUser: localStorage.getItem("agrirent_user_id") || ""
+    loggedInUser: localStorage.getItem("agrirent_user_id") || "",
+    selectedEquipmentId: null,
+    searchQuery: { search: "", location: "", category: "" }
   };
 
   const setState = (patch) => {
@@ -69,6 +73,22 @@ const initApp = (rootElement) => {
       window.alert("Booking request submitted.");
     } catch (error) {
       window.alert(`Booking failed: ${error.message}`);
+    }
+  };
+
+  const handleDeleteEquipment = async (equipmentId) => {
+    const confirmed = window.confirm("Are you sure you want to delete this equipment?");
+    if (!confirmed) return;
+
+    try {
+      await deleteEquipment(equipmentId, state.loggedInUser);
+      if (state.activePage === "equipment-detail") {
+        goBack();
+      }
+      await fetchEquipment();
+      window.alert("Equipment deleted successfully.");
+    } catch (error) {
+      window.alert(`Delete failed: ${error.message}`);
     }
   };
 
@@ -167,20 +187,32 @@ const initApp = (rootElement) => {
     event.preventDefault();
     const formData = new FormData(event.target);
     const query = {};
-    const search = formData.get("search");
-    const location = formData.get("location");
-    const category = formData.get("category");
+    const search = (formData.get("search") || "").trim();
+    const location = (formData.get("location") || "").trim();
+    const category = (formData.get("category") || "").trim();
 
     if (search) query.search = search;
     if (location) query.location = location;
     if (category) query.category = category;
 
+
     const nextHist2 = [...state.history, state.activePage];
     setState({ history: nextHist2, activePage: "marketplace", loading: true, error: "" });
     window.history.pushState({ page: "marketplace", history: [...nextHist2] }, "", "#marketplace");
 
+
     try {
       const result = await getEquipmentList(query);
+      setState({ equipment: result.data || [], loading: false });
+    } catch (error) {
+      setState({ error: error.message, loading: false });
+    }
+  };
+
+  const clearSearch = async () => {
+    setState({ searchQuery: { search: "", location: "", category: "" }, loading: true, error: "" });
+    try {
+      const result = await getEquipmentList();
       setState({ equipment: result.data || [], loading: false });
     } catch (error) {
       setState({ error: error.message, loading: false });
@@ -194,10 +226,12 @@ const initApp = (rootElement) => {
     }
 
     const nextHistory = recordHistory ? [...state.history, state.activePage] : state.history;
+
     setState({ history: nextHistory, activePage: page });
     if (recordHistory) {
       window.history.pushState({ page, history: [...nextHistory] }, "", `#${page}`);
     }
+
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -255,6 +289,15 @@ const initApp = (rootElement) => {
 
   // Use event delegation on the root element for reliable navigation
   rootElement.addEventListener("click", (event) => {
+    // Handle equipment card clicks (but not book/delete buttons)
+    const card = event.target.closest(".view-equipment");
+    if (card && !event.target.closest(".book-equipment") && !event.target.closest(".delete-equipment")) {
+      const equipmentId = card.dataset.viewEquipment;
+      setState({ selectedEquipmentId: equipmentId, history: [...state.history, state.activePage], activePage: "equipment-detail" });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
     const target = event.target.closest("[id]");
     if (!target) return;
     if (target.id === "nav-logout") {
@@ -276,6 +319,9 @@ const initApp = (rootElement) => {
       });
     }
 
+    // Initialize custom category dropdowns on all pages
+    initCategoryDropdowns();
+
     // Page-specific listeners
     if (state.activePage === "home") {
       // Category buttons
@@ -285,6 +331,7 @@ const initApp = (rootElement) => {
           const nextHist3 = [...state.history, state.activePage];
           setState({ history: nextHist3, activePage: "marketplace", loading: true, error: "" });
           window.history.pushState({ page: "marketplace", history: [...nextHist3] }, "", "#marketplace");
+
           getEquipmentList(category ? { category } : {})
             .then((result) => setState({ equipment: result.data || [], loading: false }))
             .catch((err) => setState({ error: err.message, loading: false }));
@@ -303,6 +350,11 @@ const initApp = (rootElement) => {
       document.querySelectorAll(".book-equipment").forEach((button) => {
         button.addEventListener("click", () => submitBooking(button.dataset.bookEquipment));
       });
+
+      // Delete buttons
+      document.querySelectorAll(".delete-equipment").forEach((button) => {
+        button.addEventListener("click", () => handleDeleteEquipment(button.dataset.deleteEquipment));
+      });
     }
 
     if (state.activePage === "marketplace") {
@@ -310,8 +362,15 @@ const initApp = (rootElement) => {
         button.addEventListener("click", () => submitBooking(button.dataset.bookEquipment));
       });
 
+      document.querySelectorAll(".delete-equipment").forEach((button) => {
+        button.addEventListener("click", () => handleDeleteEquipment(button.dataset.deleteEquipment));
+      });
+
       const searchForm = document.getElementById("marketplace-search-form");
       if (searchForm) searchForm.addEventListener("submit", handleSearchSubmit);
+
+      const clearBtn = document.getElementById("clear-search-btn");
+      if (clearBtn) clearBtn.addEventListener("click", clearSearch);
 
       // Smart search autocomplete on marketplace
       const marketplaceSearchInput = document.getElementById("smart-search-input");
@@ -368,12 +427,47 @@ const initApp = (rootElement) => {
       const gotoLogin = document.getElementById("goto-login");
       if (gotoLogin) gotoLogin.addEventListener("click", () => navigateTo("login", { recordHistory: false }));
     }
+
+    if (state.activePage === "equipment-detail") {
+      const backBtn = document.getElementById("detail-back-btn");
+      if (backBtn) backBtn.addEventListener("click", goBack);
+
+      document.querySelectorAll(".book-equipment").forEach((button) => {
+        button.addEventListener("click", () => submitBooking(button.dataset.bookEquipment));
+      });
+
+      document.querySelectorAll(".delete-equipment").forEach((button) => {
+        button.addEventListener("click", () => handleDeleteEquipment(button.dataset.deleteEquipment));
+      });
+
+      document.querySelectorAll(".rate-star").forEach((button) => {
+        button.addEventListener("click", async () => {
+          const rating = Number(button.dataset.rating);
+          try {
+            await rateEquipment(state.selectedEquipmentId, state.loggedInUser, rating);
+            await fetchEquipment();
+          } catch (error) {
+            window.alert(error.message);
+          }
+        });
+      });
+    }
+
+    if (state.activePage === "profile") {
+      document.querySelectorAll(".book-equipment").forEach((button) => {
+        button.addEventListener("click", () => submitBooking(button.dataset.bookEquipment));
+      });
+
+      document.querySelectorAll(".delete-equipment").forEach((button) => {
+        button.addEventListener("click", () => handleDeleteEquipment(button.dataset.deleteEquipment));
+      });
+    }
   };
 
   const getPageMarkup = () => {
     switch (state.activePage) {
       case "marketplace":
-        return marketplacePage({ loading: state.loading, error: state.error, equipment: state.equipment, loggedInUser: state.loggedInUser });
+        return marketplacePage({ loading: state.loading, error: state.error, equipment: state.equipment, loggedInUser: state.loggedInUser, searchQuery: state.searchQuery });
       case "list-equipment":
         return listEquipmentPage();
       case "about":
@@ -384,6 +478,10 @@ const initApp = (rootElement) => {
         return loginPage();
       case "register":
         return registerPage();
+      case "equipment-detail": {
+        const selected = state.equipment.find((item) => String(item._id) === String(state.selectedEquipmentId));
+        return equipmentDetailPage({ equipment: selected, loggedInUser: state.loggedInUser });
+      }
       case "profile":
         return profilePage({ loggedInUser: state.loggedInUser, equipment: state.equipment });
       case "home":
