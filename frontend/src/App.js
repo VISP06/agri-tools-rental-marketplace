@@ -105,7 +105,9 @@ const initApp = (rootElement) => {
         preview.classList.add("hidden");
         preview.src = "";
       }
-      setState({ activePage: "marketplace" });
+      const nextHist1 = [...state.history, state.activePage];
+      setState({ history: nextHist1, activePage: "marketplace" });
+      window.history.pushState({ page: "marketplace", history: [...nextHist1] }, "", "#marketplace");
       await fetchEquipment();
       window.alert("Equipment listed successfully.");
     } catch (error) {
@@ -131,6 +133,7 @@ const initApp = (rootElement) => {
       await loginUser(userId);
       localStorage.setItem("agrirent_user_id", userId);
       setState({ loggedInUser: userId, activePage: "home" });
+      window.history.pushState({ page: "home", history: [] }, "", "#home");
     } catch (error) {
       window.alert(error.message);
     }
@@ -139,6 +142,7 @@ const initApp = (rootElement) => {
   const handleLogout = () => {
     localStorage.removeItem("agrirent_user_id");
     setState({ loggedInUser: "", activePage: "home" });
+    window.history.pushState({ page: "home", history: [] }, "", "#home");
   };
 
   const handleRegisterSubmit = async (event) => {
@@ -153,6 +157,7 @@ const initApp = (rootElement) => {
       await registerUser(userId);
       window.alert("ID created successfully! You can now log in.");
       setState({ activePage: "login" });
+      window.history.pushState({ page: "login", history: [] }, "", "#login");
     } catch (error) {
       window.alert(error.message);
     }
@@ -170,7 +175,9 @@ const initApp = (rootElement) => {
     if (location) query.location = location;
     if (category) query.category = category;
 
-    setState({ activePage: "marketplace", loading: true, error: "" });
+    const nextHist2 = [...state.history, state.activePage];
+    setState({ history: nextHist2, activePage: "marketplace", loading: true, error: "" });
+    window.history.pushState({ page: "marketplace", history: [...nextHist2] }, "", "#marketplace");
 
     try {
       const result = await getEquipmentList(query);
@@ -188,6 +195,9 @@ const initApp = (rootElement) => {
 
     const nextHistory = recordHistory ? [...state.history, state.activePage] : state.history;
     setState({ history: nextHistory, activePage: page });
+    if (recordHistory) {
+      window.history.pushState({ page, history: [...nextHistory] }, "", `#${page}`);
+    }
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -201,6 +211,20 @@ const initApp = (rootElement) => {
     setState({ history: state.history.slice(0, -1), activePage: prev });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
+  // Handle browser back/forward buttons
+  window.addEventListener("popstate", (event) => {
+    if (event.state && event.state.page) {
+      setState({ activePage: event.state.page, history: event.state.history || [] });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else {
+      setState({ activePage: "home", history: [] });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  });
+
+  // Set initial browser history state
+  window.history.replaceState({ page: "home", history: [] }, "", "#home");
 
   const navMap = {
     "nav-home": "home",
@@ -258,7 +282,9 @@ const initApp = (rootElement) => {
       document.querySelectorAll(".category-btn").forEach((btn) => {
         btn.addEventListener("click", () => {
           const category = btn.dataset.category;
-          setState({ activePage: "marketplace", loading: true, error: "" });
+          const nextHist3 = [...state.history, state.activePage];
+          setState({ history: nextHist3, activePage: "marketplace", loading: true, error: "" });
+          window.history.pushState({ page: "marketplace", history: [...nextHist3] }, "", "#marketplace");
           getEquipmentList(category ? { category } : {})
             .then((result) => setState({ equipment: result.data || [], loading: false }))
             .catch((err) => setState({ error: err.message, loading: false }));
