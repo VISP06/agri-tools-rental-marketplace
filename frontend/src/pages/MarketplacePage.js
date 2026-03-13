@@ -17,12 +17,15 @@ const marketplacePage = ({ loading, error, equipment }) => {
   const searchBar = `
     <form id="marketplace-search-form" class="mt-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
       <div class="grid gap-3 md:grid-cols-4">
-        <input
-          type="text"
-          name="search"
-          placeholder="Search equipment..."
-          class="rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
-        />
+        <div class="relative">
+          <input
+            type="text"
+            id="smart-search-input"
+            name="search"
+            placeholder="Search equipment..."
+            class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+          />
+        </div>
         <input
           type="text"
           name="location"

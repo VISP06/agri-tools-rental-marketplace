@@ -8,6 +8,7 @@ import { contactPage } from "./pages/ContactPage.js";
 import { loginPage } from "./pages/LoginPage.js";
 import { registerPage } from "./pages/RegisterPage.js";
 import { getEquipmentList, createEquipment, createBooking } from "./services/api.js";
+import { initSmartSearch } from "./utils/smartSearch.js";
 
 const initApp = (rootElement) => {
   if (!rootElement) {
@@ -236,6 +237,10 @@ const initApp = (rootElement) => {
       const searchForm = document.getElementById("search-form");
       if (searchForm) searchForm.addEventListener("submit", handleSearchSubmit);
 
+      // Smart search autocomplete on home
+      const homeSearchInput = document.getElementById("smart-search-input-home");
+      if (homeSearchInput) initSmartSearch(homeSearchInput, state.equipment);
+
       // Book buttons
       document.querySelectorAll(".book-equipment").forEach((button) => {
         button.addEventListener("click", () => submitBooking(button.dataset.bookEquipment));
@@ -249,6 +254,10 @@ const initApp = (rootElement) => {
 
       const searchForm = document.getElementById("marketplace-search-form");
       if (searchForm) searchForm.addEventListener("submit", handleSearchSubmit);
+
+      // Smart search autocomplete on marketplace
+      const marketplaceSearchInput = document.getElementById("smart-search-input");
+      if (marketplaceSearchInput) initSmartSearch(marketplaceSearchInput, state.equipment);
     }
 
     if (state.activePage === "list-equipment") {

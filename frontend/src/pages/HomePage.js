@@ -33,10 +33,11 @@ const homePage = ({ loading, error, equipment }) => {
     <section class="relative -mt-7 z-20 mx-4 md:mx-8">
       <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-lg md:p-6">
         <form id="search-form" class="grid gap-3 md:grid-cols-4">
-          <div>
+          <div class="relative">
             <label class="text-xs font-medium text-slate-500">Search Equipment</label>
             <input
               type="text"
+              id="smart-search-input-home"
               name="search"
               placeholder="Tractor, Harvester, Drone..."
               class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
