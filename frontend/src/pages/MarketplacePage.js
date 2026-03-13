@@ -18,6 +18,20 @@ const marketplacePage = ({ loading, error, equipment }) => {
     <form id="marketplace-search-form" class="mt-6 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
       <div class="grid gap-3 md:grid-cols-4">
         <div class="relative">
+          <input
+            type="text"
+            id="smart-search-input"
+            name="search"
+            placeholder="Search equipment..."
+            class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+          />
+        </div>
+        <input
+          type="text"
+          name="location"
+          placeholder="Location..."
+          class="rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+        />
           <svg class="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
           <input
             type="text"
