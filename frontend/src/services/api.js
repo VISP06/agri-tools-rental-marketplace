@@ -44,5 +44,17 @@ const createBooking = async (booking) =>
     body: JSON.stringify(booking)
   });
 
-export { getEquipmentList, createEquipment, createBooking };
+const loginUser = async (userId) =>
+  request("/users/login", {
+    method: "POST",
+    body: JSON.stringify({ userId })
+  });
+
+const registerUser = async (userId) =>
+  request("/users/register", {
+    method: "POST",
+    body: JSON.stringify({ userId })
+  });
+
+export { getEquipmentList, createEquipment, createBooking, loginUser, registerUser };
 

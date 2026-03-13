@@ -1,4 +1,16 @@
-const navbar = (activePage) => `
+const navbar = (activePage, loggedInUser = "") => {
+  const authButton = loggedInUser
+    ? `<div class="flex items-center gap-2">
+        <div class="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-100 border-2 border-emerald-300">
+          <svg class="h-5 w-5 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+          </svg>
+        </div>
+        <button id="nav-logout" class="rounded-lg bg-red-500 px-3 py-1.5 text-xs font-semibold text-white hover:bg-red-600 transition-colors">Logout</button>
+      </div>`
+    : `<button id="nav-login-link" class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 transition-colors">Login</button>`;
+
+  return `
   <nav class="sticky top-0 z-50 bg-white shadow-sm border-b border-slate-200">
     <div class="mx-auto max-w-7xl px-4 md:px-6">
       <div class="flex h-16 items-center justify-between">
@@ -31,9 +43,13 @@ const navbar = (activePage) => `
             </svg>
             List Equipment
           </button>
+<<<<<<< HEAD
           <button id="nav-login-link" class="rounded-lg border-2 border-emerald-600 px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-600 hover:text-white transition-colors">
             Login
           </button>
+=======
+          ${authButton}
+>>>>>>> bd871b8 (updated frontend pages)
           <button id="mobile-menu-toggle" class="md:hidden rounded-lg p-2 text-slate-600 hover:bg-slate-100">
             <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
@@ -64,5 +80,6 @@ const navbar = (activePage) => `
     </div>
   </nav>
 `;
+};
 
 export { navbar };

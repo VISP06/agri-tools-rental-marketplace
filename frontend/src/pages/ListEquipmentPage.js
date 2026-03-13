@@ -58,19 +58,6 @@ const listEquipmentPage = () => `
           <textarea class="rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20" name="description" rows="4" placeholder="Condition, power, fuel type, operator availability..."></textarea>
         </label>
 
-        <div class="flex flex-col gap-2 text-sm md:col-span-2">
-          <span class="font-medium text-slate-700">Equipment Photos</span>
-          <label id="image-drop-zone" class="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 px-4 py-8 transition-colors hover:border-emerald-500 hover:bg-emerald-50/30">
-            <svg class="h-8 w-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z"/>
-            </svg>
-            <span class="text-sm text-slate-500">Click to upload or drag and drop</span>
-            <span class="text-xs text-slate-400">PNG, JPG up to 5MB each</span>
-            <input type="file" name="images" accept="image/png,image/jpeg" multiple class="hidden" />
-          </label>
-          <div id="image-preview-container" class="flex flex-wrap gap-3"></div>
-        </div>
-
         <button class="rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 transition-colors md:col-span-2" type="submit">
           Save Listing
         </button>
