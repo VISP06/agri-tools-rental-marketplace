@@ -119,6 +119,34 @@ const listEquipmentPage = () => `
     </aside>
   </section>
 
+<<<<<<< HEAD
+  <section class="mt-12">
+    <div class="text-center">
+      <h2 class="text-xl font-bold text-slate-900">Frequently Asked Questions</h2>
+    </div>
+    <div class="mt-6 grid gap-4 md:grid-cols-2">
+      <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h3 class="text-sm font-semibold text-slate-900">Is there a listing fee?</h3>
+        <p class="mt-2 text-sm text-slate-500">No, listing your equipment on AgriRent is completely free. We only take a small commission when a booking is confirmed.</p>
+      </div>
+      <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h3 class="text-sm font-semibold text-slate-900">How do I get paid?</h3>
+        <p class="mt-2 text-sm text-slate-500">Payments are processed securely through our platform. You'll receive the rental amount directly in your bank account after each booking.</p>
+      </div>
+      <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h3 class="text-sm font-semibold text-slate-900">What if my equipment gets damaged?</h3>
+        <p class="mt-2 text-sm text-slate-500">We have a dispute resolution system and encourage renters to carry insurance. Detailed terms are agreed upon before each booking.</p>
+      </div>
+      <div class="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+        <h3 class="text-sm font-semibold text-slate-900">Can I set my own availability?</h3>
+        <p class="mt-2 text-sm text-slate-500">Absolutely! You have full control over your rental calendar. Set blackout dates and availability windows that suit your schedule.</p>
+      </div>
+    </div>
+  </section>
+  
+
+=======
+>>>>>>> 1de63c0c87ff88cffa2365a5a2a6c751e6ba8ca0
 `;
 
 export { listEquipmentPage };

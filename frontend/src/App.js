@@ -16,6 +16,7 @@ const initApp = (rootElement) => {
 
   const state = {
     activePage: "home",
+    history: [],
     equipment: [],
     loading: false,
     error: ""
@@ -153,8 +154,25 @@ const initApp = (rootElement) => {
     }
   };
 
-  const navigateTo = (page) => {
-    setState({ activePage: page });
+  const navigateTo = (page, options = {}) => {
+    const { recordHistory = true } = options;
+    if (page === state.activePage) {
+      return;
+    }
+
+    const nextHistory = recordHistory ? [...state.history, state.activePage] : state.history;
+    setState({ history: nextHistory, activePage: page });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const goBack = () => {
+    if (state.history.length === 0) {
+      navigateTo("home", { recordHistory: false });
+      return;
+    }
+
+    const prev = state.history[state.history.length - 1];
+    setState({ history: state.history.slice(0, -1), activePage: prev });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -309,19 +327,25 @@ const initApp = (rootElement) => {
     }
 
     if (state.activePage === "login") {
+      const backBtn = document.getElementById("back-btn");
+      if (backBtn) backBtn.addEventListener("click", goBack);
+
       const form = document.getElementById("login-form");
       if (form) form.addEventListener("submit", handleLoginSubmit);
 
       const gotoRegister = document.getElementById("goto-register");
-      if (gotoRegister) gotoRegister.addEventListener("click", () => navigateTo("register"));
+      if (gotoRegister) gotoRegister.addEventListener("click", () => navigateTo("register", { recordHistory: false }));
     }
 
     if (state.activePage === "register") {
+      const backBtn = document.getElementById("back-btn");
+      if (backBtn) backBtn.addEventListener("click", goBack);
+
       const form = document.getElementById("register-form");
       if (form) form.addEventListener("submit", handleRegisterSubmit);
 
       const gotoLogin = document.getElementById("goto-login");
-      if (gotoLogin) gotoLogin.addEventListener("click", () => navigateTo("login"));
+      if (gotoLogin) gotoLogin.addEventListener("click", () => navigateTo("login", { recordHistory: false }));
     }
   };
 

@@ -12,16 +12,16 @@ const navbar = (activePage) => `
         <div class="hidden md:flex items-center gap-1">
           <button id="nav-home-link" class="nav-link rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
             activePage === "home" ? "bg-emerald-50 text-emerald-700" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-          }">Home</button>
+          }"><svg class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>Home</button>
           <button id="nav-marketplace-link" class="nav-link rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
             activePage === "marketplace" ? "bg-emerald-50 text-emerald-700" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-          }">Equipments</button>
+          }"><svg class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/></svg>Equipments</button>
           <button id="nav-about-link" class="nav-link rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
             activePage === "about" ? "bg-emerald-50 text-emerald-700" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-          }">About Us</button>
+          }"><svg class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>About Us</button>
           <button id="nav-contact-link" class="nav-link rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
             activePage === "contact" ? "bg-emerald-50 text-emerald-700" : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
-          }">Contact</button>
+          }"><svg class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>Contact</button>
         </div>
 
         <div class="flex items-center gap-3">
@@ -31,7 +31,7 @@ const navbar = (activePage) => `
             </svg>
             List Equipment
           </button>
-          <button id="nav-login-link" class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 transition-colors">
+          <button id="nav-login-link" class="rounded-lg border-2 border-emerald-600 px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-600 hover:text-white transition-colors">
             Login
           </button>
           <button id="mobile-menu-toggle" class="md:hidden rounded-lg p-2 text-slate-600 hover:bg-slate-100">
@@ -46,19 +46,19 @@ const navbar = (activePage) => `
         <div class="flex flex-col gap-1 pt-2 border-t border-slate-200">
           <button id="nav-home-mobile" class="nav-link rounded-lg px-3 py-2 text-left text-sm font-medium ${
             activePage === "home" ? "bg-emerald-50 text-emerald-700" : "text-slate-600 hover:bg-slate-100"
-          }">Home</button>
+          }"><svg class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>Home</button>
           <button id="nav-marketplace-mobile" class="nav-link rounded-lg px-3 py-2 text-left text-sm font-medium ${
             activePage === "marketplace" ? "bg-emerald-50 text-emerald-700" : "text-slate-600 hover:bg-slate-100"
-          }">Equipments</button>
+          }"><svg class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/></svg>Equipments</button>
           <button id="nav-about-mobile" class="nav-link rounded-lg px-3 py-2 text-left text-sm font-medium ${
             activePage === "about" ? "bg-emerald-50 text-emerald-700" : "text-slate-600 hover:bg-slate-100"
-          }">About Us</button>
+          }"><svg class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>About Us</button>
           <button id="nav-contact-mobile" class="nav-link rounded-lg px-3 py-2 text-left text-sm font-medium ${
             activePage === "contact" ? "bg-emerald-50 text-emerald-700" : "text-slate-600 hover:bg-slate-100"
-          }">Contact</button>
+          }"><svg class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>Contact</button>
           <button id="nav-list-equipment-mobile" class="nav-link rounded-lg px-3 py-2 text-left text-sm font-medium ${
             activePage === "list-equipment" ? "bg-emerald-50 text-emerald-700" : "text-slate-600 hover:bg-slate-100"
-          }">List Equipment</button>
+          }"><svg class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>List Equipment</button>
         </div>
       </div>
     </div>
