@@ -106,7 +106,6 @@ const listEquipmentPage = () => `
     </aside>
   </section>
 
-<<<<<<< HEAD
   <section class="mt-12">
     <div class="text-center">
       <h2 class="text-xl font-bold text-slate-900">Frequently Asked Questions</h2>
@@ -130,10 +129,6 @@ const listEquipmentPage = () => `
       </div>
     </div>
   </section>
-  
-
-=======
->>>>>>> 1de63c0c87ff88cffa2365a5a2a6c751e6ba8ca0
 `;
 
 export { listEquipmentPage };

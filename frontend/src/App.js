@@ -7,6 +7,7 @@ import { aboutPage } from "./pages/AboutPage.js";
 import { contactPage } from "./pages/ContactPage.js";
 import { loginPage } from "./pages/LoginPage.js";
 import { registerPage } from "./pages/RegisterPage.js";
+import { profilePage } from "./pages/ProfilePage.js";
 
 import { getEquipmentList, createEquipment, createBooking, loginUser, registerUser } from "./services/api.js";
 import { initSmartSearch } from "./utils/smartSearch.js";
@@ -214,6 +215,8 @@ const initApp = (rootElement) => {
     "nav-list-equipment-link": "list-equipment",
     "nav-list-equipment-mobile": "list-equipment",
     "nav-login-link": "login",
+    "nav-profile": "profile",
+    "profile-goto-list": "list-equipment",
     "footer-home": "home",
     "footer-marketplace": "marketplace",
     "footer-list-equipment": "list-equipment",
@@ -355,6 +358,8 @@ const initApp = (rootElement) => {
         return loginPage();
       case "register":
         return registerPage();
+      case "profile":
+        return profilePage({ loggedInUser: state.loggedInUser, equipment: state.equipment });
       case "home":
       default:
         return homePage({ loading: state.loading, error: state.error, equipment: state.equipment, loggedInUser: state.loggedInUser });
