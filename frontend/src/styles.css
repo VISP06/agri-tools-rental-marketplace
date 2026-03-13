@@ -90,3 +90,64 @@ button {
 ::-webkit-scrollbar-thumb:hover {
   background: #64748b;
 }
+
+/* ── Smart Search Autocomplete ── */
+.smart-search-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  margin-top: 4px;
+  max-height: 0;
+  overflow: hidden;
+  background: #fff;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  border: 1px solid transparent;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: max-height 0.25s ease, opacity 0.2s ease, transform 0.2s ease;
+}
+
+.smart-search-dropdown.open {
+  max-height: 320px;
+  overflow-y: auto;
+  border-color: #e2e8f0;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.smart-search-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  font-size: 0.875rem;
+  color: #334155;
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+
+.smart-search-item:hover,
+.smart-search-item.active {
+  background: #ecfdf5;
+  color: #065f46;
+}
+
+.smart-search-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: #94a3b8;
+}
+
+.smart-search-item:hover .smart-search-icon,
+.smart-search-item.active .smart-search-icon {
+  color: #10b981;
+}
+
+.smart-search-highlight {
+  font-weight: 700;
+  color: #059669;
+}
