@@ -1,6 +1,10 @@
 const loginPage = () => `
   <section class="flex min-h-[80vh] items-center justify-center px-4">
     <div class="w-full max-w-md">
+      <button type="button" id="back-btn" class="mb-4 flex items-center gap-1 text-sm text-slate-500 hover:text-slate-700 transition-colors">
+        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+        Back
+      </button>
       <div class="rounded-2xl border border-slate-200 bg-white p-8 shadow-lg">
         <div class="text-center">
           <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
@@ -79,7 +83,7 @@ const loginPage = () => `
 
         <p class="mt-6 text-center text-sm text-slate-600">
           Don't have an account?
-          <button id="goto-register" class="font-semibold text-emerald-600 hover:text-emerald-700 transition-colors">Create one now</button>
+          <button type="button" id="goto-register" class="font-semibold text-emerald-600 hover:text-emerald-700 transition-colors">Create one now</button>
         </p>
       </div>
     </div>
