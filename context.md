@@ -244,7 +244,7 @@ Then open:
 ```bash
 cd backend && npm run check
 cd frontend && npm run check
-```
+```t
 
 ## 10) Known Gaps / Next Priorities
 
