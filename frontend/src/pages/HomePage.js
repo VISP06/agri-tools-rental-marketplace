@@ -77,10 +77,10 @@ const homePage = ({ loading, error, equipment }) => {
         <span class="inline-block rounded-full bg-emerald-500/20 px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-emerald-300 border border-emerald-500/30">
           Trusted by 2,000+ Farmers
         </span>
-        <h1 class="mt-6 text-4xl font-extrabold tracking-tight leading-tight md:text-5xl lg:text-6xl" style="font-family: 'Roboto', sans-serif;">
+        <h1 class="mt-6 text-4xl font-semibold tracking-tight leading-tight md:text-5xl lg:text-6xl" style="font-family: 'Poppins', sans-serif;">
           Rent Quality Farm Equipment Across India
         </h1>
-        <p class="mt-6 text-lg text-emerald-100/80 md:text-xl max-w-2xl mx-auto" style="font-family: 'Roboto', sans-serif;">
+        <p class="mt-6 text-lg text-emerald-100/80 md:text-xl max-w-2xl mx-auto" style="font-family: 'Poppins', sans-serif;">
           Access tractors, harvesters, irrigation systems, and more at affordable rental rates. No need to buy expensive machinery — just rent what you need, when you need it.
         </p>
         <div class="mt-10 flex flex-wrap justify-center gap-4">
