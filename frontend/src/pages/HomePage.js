@@ -29,57 +29,6 @@ const homePage = ({ loading, error, equipment }) => {
     </section>
   `;
 
-  const searchSection = `
-    <section class="relative -mt-7 z-20 mx-4 md:mx-8">
-      <div class="rounded-xl border border-slate-200 bg-white p-4 shadow-lg md:p-6">
-        <form id="search-form" class="grid gap-3 md:grid-cols-4">
-          <div>
-            <label class="text-xs font-medium text-slate-500">Search Equipment</label>
-            <input
-              type="text"
-              name="search"
-              placeholder="Tractor, Harvester, Drone..."
-              class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
-            />
-          </div>
-          <div>
-            <label class="text-xs font-medium text-slate-500">Location</label>
-            <input
-              type="text"
-              name="location"
-              placeholder="District, State..."
-              class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
-            />
-          </div>
-          <div>
-            <label class="text-xs font-medium text-slate-500">Category</label>
-            <select
-              name="category"
-              class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
-            >
-              <option value="">All Categories</option>
-              <option value="Tractor">Tractors</option>
-              <option value="Harvester">Harvesters</option>
-              <option value="Irrigation">Irrigation Systems</option>
-              <option value="Drone">Agricultural Drones</option>
-              <option value="Plough">Ploughs & Tillers</option>
-              <option value="Sprayer">Sprayers</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-          <div class="flex items-end">
-            <button type="submit" class="w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 transition-colors">
-              <span class="flex items-center justify-center gap-2">
-                <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                Search
-              </span>
-            </button>
-          </div>
-        </form>
-      </div>
-    </section>
-  `;
-
   const categoriesSection = `
     <section class="mt-16">
       <div class="text-center">
@@ -346,7 +295,6 @@ const homePage = ({ loading, error, equipment }) => {
 
   return `
     ${heroSection}
-    ${searchSection}
     ${categoriesSection}
     ${listingsSection}
     ${partnerCTA}
