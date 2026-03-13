@@ -47,7 +47,6 @@ const createEquipment = async (req, res, next) => {
   try {
     const payload = {
       ...req.body,
-      hourlyRate: Number(req.body.hourlyRate),
       dailyRate: Number(req.body.dailyRate)
     };
 

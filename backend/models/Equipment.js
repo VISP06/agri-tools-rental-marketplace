@@ -21,6 +21,11 @@ const equipmentSchema = new mongoose.Schema(
       required: true,
       trim: true
     },
+    ownerId: {
+      type: String,
+      default: "",
+      trim: true
+    },
     name: {
       type: String,
       required: true,
@@ -43,7 +48,7 @@ const equipmentSchema = new mongoose.Schema(
     },
     hourlyRate: {
       type: Number,
-      required: true,
+      default: 0,
       min: 0
     },
     dailyRate: {
