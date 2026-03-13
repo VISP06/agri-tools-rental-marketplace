@@ -21,6 +21,11 @@ const equipmentSchema = new mongoose.Schema(
       required: true,
       trim: true
     },
+    ownerId: {
+      type: String,
+      default: "",
+      trim: true
+    },
     name: {
       type: String,
       required: true,
