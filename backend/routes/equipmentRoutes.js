@@ -5,11 +5,15 @@ const {
   createEquipment,
   updateEquipment,
   deleteEquipment,
-  rateEquipment
+  rateEquipment,
+  geocodeSearch,
+  reverseGeocode
 } = require("../controllers/equipmentController");
 
 const router = express.Router();
 
+router.get("/geocode", geocodeSearch);
+router.get("/reverse-geocode", reverseGeocode);
 router.get("/", getEquipments);
 router.get("/:id", getEquipmentById);
 router.post("/", createEquipment);

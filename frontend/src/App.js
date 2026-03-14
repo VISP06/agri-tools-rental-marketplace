@@ -14,7 +14,8 @@ import { paymentPage, initPaymentMethods } from "./pages/PaymentPage.js";
 import { bookingConfirmationPage } from "./pages/BookingConfirmationPage.js";
 
 import { getEquipmentList, createEquipment, createBooking, loginUser, registerUser, deleteEquipment, rateEquipment, createBatchBookings, createPaymentOrder, verifyPayment } from "./services/api.js";
-import { initSmartSearch, initLocationSearch } from "./utils/smartSearch.js";
+import { initSmartSearch } from "./utils/smartSearch.js";
+import { initLocationSearch } from "./utils/locationSearch.js";
 import { initCategoryDropdowns } from "./components/CategoryDropdown.js";
 
 
@@ -36,7 +37,10 @@ const initApp = (rootElement) => {
     renterName: "",
     renterPhone: "",
     confirmedBookings: [],
-    paymentId: ""
+    paymentId: "",
+    userLat: null,
+    userLng: null,
+    userCity: ""
   };
 
   const setState = (patch) => {
@@ -47,11 +51,17 @@ const initApp = (rootElement) => {
     render();
   };
 
-  const fetchEquipment = async () => {
+  const fetchEquipment = async (query = {}) => {
     setState({ loading: true, error: "" });
 
     try {
-      const result = await getEquipmentList();
+      // Auto-include user coordinates for proximity sorting if available and no explicit coords
+      const q = { ...query };
+      if (!q.lat && !q.lng && state.userLat && state.userLng) {
+        q.lat = state.userLat;
+        q.lng = state.userLng;
+      }
+      const result = await getEquipmentList(q);
       setState({ equipment: result.data || [], loading: false });
     } catch (error) {
       setState({ error: error.message, loading: false });
@@ -447,9 +457,16 @@ const initApp = (rootElement) => {
     if (location) query.location = location;
     if (category) query.category = category;
 
+    // Read lat/lng from location input data attributes (set by location autocomplete)
+    const locationInput = event.target.querySelector('input[name="location"]');
+    if (locationInput && locationInput.dataset.lat && locationInput.dataset.lng) {
+      query.lat = locationInput.dataset.lat;
+      query.lng = locationInput.dataset.lng;
+    }
+
 
     const nextHist2 = [...state.history, state.activePage];
-    setState({ history: nextHist2, activePage: "marketplace", loading: true, error: "", searchQuery: { search, location, category } });
+    setState({ history: nextHist2, activePage: "marketplace", loading: true, error: "", searchQuery: query });
     window.history.pushState({ page: "marketplace", history: [...nextHist2] }, "", "#marketplace");
 
     try {
@@ -463,7 +480,12 @@ const initApp = (rootElement) => {
   const clearSearch = async () => {
     setState({ searchQuery: { search: "", location: "", category: "" }, loading: true, error: "" });
     try {
-      const result = await getEquipmentList();
+      const q = {};
+      if (state.userLat && state.userLng) {
+        q.lat = state.userLat;
+        q.lng = state.userLng;
+      }
+      const result = await getEquipmentList(q);
       setState({ equipment: result.data || [], loading: false });
     } catch (error) {
       setState({ error: error.message, loading: false });
@@ -593,7 +615,12 @@ const initApp = (rootElement) => {
           setState({ history: nextHist3, activePage: "marketplace", loading: true, error: "" });
           window.history.pushState({ page: "marketplace", history: [...nextHist3] }, "", "#marketplace");
 
-          getEquipmentList(category ? { category } : {})
+          const q = category ? { category } : {};
+          if (state.userLat && state.userLng) {
+            q.lat = state.userLat;
+            q.lng = state.userLng;
+          }
+          getEquipmentList(q)
             .then((result) => setState({ equipment: result.data || [], loading: false }))
             .catch((err) => setState({ error: err.message, loading: false }));
         });
@@ -609,7 +636,7 @@ const initApp = (rootElement) => {
 
       // Location autocomplete on home
       const homeLocationInput = document.getElementById("location-search-input-home");
-      if (homeLocationInput) initLocationSearch(homeLocationInput, state.equipment);
+      if (homeLocationInput) initLocationSearch(homeLocationInput);
 
       // Book buttons
       document.querySelectorAll(".book-equipment").forEach((button) => {
@@ -643,12 +670,16 @@ const initApp = (rootElement) => {
 
       // Location autocomplete on marketplace
       const marketplaceLocationInput = document.getElementById("location-search-input");
-      if (marketplaceLocationInput) initLocationSearch(marketplaceLocationInput, state.equipment);
+      if (marketplaceLocationInput) initLocationSearch(marketplaceLocationInput);
     }
 
     if (state.activePage === "list-equipment") {
       const form = document.getElementById("add-equipment-form");
       if (form) form.addEventListener("submit", handleEquipmentSubmit);
+
+      // Location autocomplete on list equipment form
+      const listLocationInput = document.getElementById("location-search-input-list");
+      if (listLocationInput) initLocationSearch(listLocationInput);
 
       const imageInput = form && form.querySelector('input[name="image"]');
       const imagePreview = document.getElementById("image-preview");
@@ -828,7 +859,39 @@ const initApp = (rootElement) => {
   };
 
   render();
-  fetchEquipment();
+
+  // Auto-detect user location and fetch equipment sorted by proximity
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        state.userLat = lat;
+        state.userLng = lng;
+
+        // Reverse geocode to get city name
+        try {
+          const res = await fetch(`http://localhost:5000/api/equipment/reverse-geocode?lat=${lat}&lng=${lng}`);
+          const payload = await res.json();
+          if (payload.success && payload.data.display_name) {
+            state.userCity = payload.data.display_name;
+          }
+        } catch (e) {
+          // Ignore reverse geocode failure
+        }
+
+        // Re-fetch equipment with user's coordinates for proximity sorting
+        fetchEquipment();
+      },
+      () => {
+        // User denied geolocation or not available — load without sorting
+        fetchEquipment();
+      },
+      { timeout: 5000 }
+    );
+  } else {
+    fetchEquipment();
+  }
 };
 
 export { initApp };
