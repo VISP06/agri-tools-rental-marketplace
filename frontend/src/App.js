@@ -145,7 +145,7 @@ const initApp = (rootElement) => {
 
     for (const item of state.cart) {
       if (!item.startDate) {
-        const eq = state.equipment.find((e) => String(e._id) === String(item.equipmentId));
+        const eq = state.equipment.find((e) => String(e.id) === String(item.equipmentId));
         showToast(`Please set a start date for ${eq?.name || "an item"}`, "error");
         return;
       }
@@ -160,7 +160,7 @@ const initApp = (rootElement) => {
 
   const handlePayNow = async () => {
     const bookings = state.cart.map((item) => {
-      const eq = state.equipment.find((e) => String(e._id) === String(item.equipmentId));
+      const eq = state.equipment.find((e) => String(e.id) === String(item.equipmentId));
       const dailyRate = eq?.dailyRate || 0;
       const numberOfDays = item.numberOfDays || 1;
       const totalPrice = dailyRate * numberOfDays;
@@ -215,7 +215,7 @@ const initApp = (rootElement) => {
     const bookings = state.confirmedBookings || [];
     let grandTotal = 0;
     const rows = bookings.map((b, i) => {
-      const eq = state.equipment.find((e) => String(e._id) === String(b.equipmentId));
+      const eq = state.equipment.find((e) => String(e.id) === String(b.equipmentId));
       const name = eq?.name || "Equipment";
       const days = b.numberOfDays || 1;
       const rate = eq?.dailyRate || 0;
@@ -774,7 +774,7 @@ const initApp = (rootElement) => {
       case "register":
         return registerPage();
       case "equipment-detail": {
-        const selected = state.equipment.find((item) => String(item._id) === String(state.selectedEquipmentId));
+        const selected = state.equipment.find((item) => String(item.id) === String(state.selectedEquipmentId));
         return equipmentDetailPage({ equipment: selected, loggedInUser: state.loggedInUser });
       }
       case "profile":
