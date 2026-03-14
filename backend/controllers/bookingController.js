@@ -3,12 +3,23 @@ const { getDb } = require("../db/database");
 const getBookings = async (req, res, next) => {
   try {
     const db = getDb();
-    const rows = db.prepare(`
-      SELECT b.*, e.name as equipmentName, e.category as equipmentCategory, e.location as equipmentLocation
+    const { renterId } = req.query;
+
+    let sql = `
+      SELECT b.*, e.name as equipmentName, e.category as equipmentCategory, e.location as equipmentLocation, e.dailyRate as equipmentDailyRate, e.images as equipmentImages
       FROM bookings b
       LEFT JOIN equipment e ON b.equipmentId = e.id
-      ORDER BY b.createdAt DESC
-    `).all();
+    `;
+    const params = [];
+
+    if (renterId) {
+      sql += " WHERE b.renterId = ?";
+      params.push(renterId);
+    }
+
+    sql += " ORDER BY b.createdAt DESC";
+
+    const rows = db.prepare(sql).all(...params);
 
     const bookings = rows.map((row) => ({
       ...row,
@@ -17,7 +28,9 @@ const getBookings = async (req, res, next) => {
         _id: row.equipmentId,
         name: row.equipmentName,
         category: row.equipmentCategory,
-        location: row.equipmentLocation
+        location: row.equipmentLocation,
+        dailyRate: row.equipmentDailyRate,
+        images: JSON.parse(row.equipmentImages || "[]")
       }
     }));
 
@@ -30,11 +43,11 @@ const getBookings = async (req, res, next) => {
 const createBooking = async (req, res, next) => {
   try {
     const db = getDb();
-    const { equipmentId, renterName, renterPhone, startDate, endDate, quantity, totalPrice } = req.body;
+    const { equipmentId, renterId, renterName, renterPhone, startDate, endDate, quantity, totalPrice } = req.body;
 
     const result = db.prepare(
-      "INSERT INTO bookings (equipmentId, renterName, renterPhone, startDate, endDate, quantity, totalPrice) VALUES (?, ?, ?, ?, ?, ?, ?)"
-    ).run(equipmentId, renterName, renterPhone, startDate, endDate, quantity || 1, totalPrice || 0);
+      "INSERT INTO bookings (equipmentId, renterId, renterName, renterPhone, startDate, endDate, quantity, totalPrice) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+    ).run(equipmentId, renterId || "", renterName, renterPhone, startDate, endDate, quantity || 1, totalPrice || 0);
 
     const booking = db.prepare("SELECT * FROM bookings WHERE id = ?").get(result.lastInsertRowid);
     res.status(201).json({ success: true, data: { ...booking, _id: booking.id } });
@@ -55,14 +68,14 @@ const createBatchBookings = async (req, res, next) => {
     }
 
     const insertStmt = db.prepare(
-      "INSERT INTO bookings (equipmentId, renterName, renterPhone, startDate, endDate, quantity, totalPrice) VALUES (?, ?, ?, ?, ?, ?, ?)"
+      "INSERT INTO bookings (equipmentId, renterId, renterName, renterPhone, startDate, endDate, quantity, totalPrice) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
     );
 
     const insertMany = db.transaction((items) => {
       const results = [];
       for (const item of items) {
         const result = insertStmt.run(
-          item.equipmentId, item.renterName, item.renterPhone,
+          item.equipmentId, item.renterId || "", item.renterName, item.renterPhone,
           item.startDate, item.endDate, item.quantity || 1, item.totalPrice || 0
         );
         const booking = db.prepare("SELECT * FROM bookings WHERE id = ?").get(result.lastInsertRowid);

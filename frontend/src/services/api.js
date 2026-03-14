@@ -1,4 +1,4 @@
-const API_BASE_URL = window.location.hostname === "localhost" ? "http://localhost:5000/api" : "/api";
+const API_BASE_URL = "/api";
 
 const request = async (path, options = {}) => {
   const response = await fetch(`${API_BASE_URL}${path}`, {
@@ -74,5 +74,8 @@ const createBatchBookings = async (bookings) =>
     body: JSON.stringify({ bookings })
   });
 
-export { getEquipmentList, createEquipment, createBooking, loginUser, registerUser, deleteEquipment, rateEquipment, createBatchBookings };
+const getMyBookings = async (renterId) =>
+  request(`/bookings?renterId=${encodeURIComponent(renterId)}`);
+
+export { getEquipmentList, createEquipment, createBooking, loginUser, registerUser, deleteEquipment, rateEquipment, createBatchBookings, getMyBookings };
 

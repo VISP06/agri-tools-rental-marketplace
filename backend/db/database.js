@@ -37,6 +37,7 @@ const initDatabase = () => {
     CREATE TABLE IF NOT EXISTS bookings (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       equipmentId INTEGER NOT NULL,
+      renterId TEXT DEFAULT '',
       renterName TEXT NOT NULL,
       renterPhone TEXT NOT NULL,
       startDate TEXT NOT NULL,
@@ -63,6 +64,13 @@ const initDatabase = () => {
   // Migration: add quantity column if missing (for existing databases)
   try {
     db.exec("ALTER TABLE bookings ADD COLUMN quantity INTEGER DEFAULT 1");
+  } catch (e) {
+    // Column already exists, ignore
+  }
+
+  // Migration: add renterId column if missing
+  try {
+    db.exec("ALTER TABLE bookings ADD COLUMN renterId TEXT DEFAULT ''");
   } catch (e) {
     // Column already exists, ignore
   }

@@ -13,7 +13,7 @@ import { cartPage } from "./pages/CartPage.js";
 import { paymentPage, initPaymentMethods } from "./pages/PaymentPage.js";
 import { bookingConfirmationPage } from "./pages/BookingConfirmationPage.js";
 
-import { getEquipmentList, createEquipment, createBooking, loginUser, registerUser, deleteEquipment, rateEquipment, createBatchBookings } from "./services/api.js";
+import { getEquipmentList, createEquipment, createBooking, loginUser, registerUser, deleteEquipment, rateEquipment, createBatchBookings, getMyBookings } from "./services/api.js";
 import { initSmartSearch } from "./utils/smartSearch.js";
 import { initLocationSearch } from "./utils/locationSearch.js";
 import { initCategoryDropdowns } from "./components/CategoryDropdown.js";
@@ -38,6 +38,7 @@ const initApp = (rootElement) => {
     renterPhone: "",
     confirmedBookings: [],
     paymentId: "",
+    bookings: [],
     userLat: null,
     userLng: null,
     userCity: ""
@@ -170,6 +171,7 @@ const initApp = (rootElement) => {
 
       return {
         equipmentId: item.equipmentId,
+        renterId: state.loggedInUser,
         renterName: state.renterName,
         renterPhone: state.renterPhone,
         startDate: item.startDate,
@@ -695,6 +697,18 @@ const initApp = (rootElement) => {
     }
 
     if (state.activePage === "profile") {
+      // Fetch user's bookings
+      if (state.loggedInUser) {
+        getMyBookings(state.loggedInUser)
+          .then((result) => {
+            if (result.data && JSON.stringify(result.data) !== JSON.stringify(state.bookings)) {
+              state.bookings = result.data;
+              render();
+            }
+          })
+          .catch(() => {});
+      }
+
       document.querySelectorAll(".book-equipment").forEach((button) => {
         button.addEventListener("click", () => addToCart(button.dataset.bookEquipment));
       });
@@ -764,7 +778,7 @@ const initApp = (rootElement) => {
         return equipmentDetailPage({ equipment: selected, loggedInUser: state.loggedInUser });
       }
       case "profile":
-        return profilePage({ loggedInUser: state.loggedInUser, equipment: state.equipment });
+        return profilePage({ loggedInUser: state.loggedInUser, equipment: state.equipment, bookings: state.bookings });
       case "cart":
         return cartPage({ cart: state.cart, equipment: state.equipment, loggedInUser: state.loggedInUser });
       case "payment":
