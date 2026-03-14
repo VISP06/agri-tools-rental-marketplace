@@ -14,8 +14,12 @@ const getEquipments = async (req, res, next) => {
     }
 
     if (location) {
-      sql += " AND location LIKE ? COLLATE NOCASE";
-      params.push(`%${location}%`);
+      const locationParts = location.split(/[\s,]+/).filter(Boolean);
+      if (locationParts.length > 0) {
+        const locationClauses = locationParts.map(() => "location LIKE ? COLLATE NOCASE");
+        sql += ` AND (${locationClauses.join(" OR ")})`;
+        locationParts.forEach((part) => params.push(`%${part}%`));
+      }
     }
 
     if (category) {

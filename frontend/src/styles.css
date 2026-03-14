@@ -154,3 +154,152 @@ button {
   font-weight: 700;
   color: #059669;
 }
+
+/* ── Toast Notification ── */
+.toast-notification {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+}
+
+.toast-notification.toast-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.toast-success {
+  background: #059669;
+}
+
+.toast-error {
+  background: #dc2626;
+}
+
+/* ── Cart Page ── */
+.cart-item-card {
+  transition: box-shadow 0.15s ease;
+}
+
+.cart-item-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+/* ── Date Picker Styling ── */
+input[type="date"] {
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  color: #334155;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.6;
+  filter: invert(42%) sepia(93%) saturate(400%) hue-rotate(120deg) brightness(95%) contrast(90%);
+  transition: opacity 0.15s ease;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
+input[type="date"]:focus {
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+}
+
+/* Webkit date picker popup styling */
+::-webkit-datetime-edit {
+  padding: 0;
+}
+
+::-webkit-datetime-edit-fields-wrapper {
+  padding: 0;
+}
+
+::-webkit-datetime-edit-text {
+  color: #94a3b8;
+  padding: 0 2px;
+}
+
+::-webkit-datetime-edit-month-field,
+::-webkit-datetime-edit-day-field,
+::-webkit-datetime-edit-year-field {
+  color: #334155;
+  font-weight: 500;
+}
+
+::-webkit-datetime-edit-month-field:focus,
+::-webkit-datetime-edit-day-field:focus,
+::-webkit-datetime-edit-year-field:focus {
+  background: #ecfdf5;
+  color: #059669;
+  border-radius: 2px;
+  outline: none;
+}
+
+/* ── Success Checkmark Animation ── */
+.success-checkmark-circle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: #059669;
+  animation: successPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.success-checkmark-icon {
+  width: 40px;
+  height: 40px;
+  color: #fff;
+  stroke-dasharray: 50;
+  stroke-dashoffset: 50;
+  animation: successDraw 0.6s ease 0.3s forwards;
+}
+
+@keyframes successPop {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes successDraw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* ── Payment Button Loading ── */
+button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* ── Payment Method Options ── */
+.payment-method-option {
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}

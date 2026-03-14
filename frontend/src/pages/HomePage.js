@@ -55,10 +55,11 @@ const homePage = ({ loading, error, equipment, loggedInUser }) => {
               class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
             />
           </div>
-          <div>
+          <div class="relative">
             <label class="text-xs font-medium text-slate-500">Location</label>
             <input
               type="text"
+              id="location-search-input-home"
               name="location"
               placeholder="District, State..."
               class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
@@ -255,6 +256,7 @@ const homePage = ({ loading, error, equipment, loggedInUser }) => {
             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
           </button>
         </div>
+    
         <div class="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           ${equipment.slice(0, 6).map((item) => equipmentCard(item, loggedInUser)).join("")}
         </div>

@@ -68,5 +68,23 @@ const rateEquipment = async (id, userId, rating) =>
     body: JSON.stringify({ userId, rating })
   });
 
-export { getEquipmentList, createEquipment, createBooking, loginUser, registerUser, deleteEquipment, rateEquipment };
+const createBatchBookings = async (bookings) =>
+  request("/bookings/batch", {
+    method: "POST",
+    body: JSON.stringify({ bookings })
+  });
+
+const createPaymentOrder = async (orderData) =>
+  request("/payments/create-order", {
+    method: "POST",
+    body: JSON.stringify(orderData)
+  });
+
+const verifyPayment = async (paymentData) =>
+  request("/payments/verify", {
+    method: "POST",
+    body: JSON.stringify(paymentData)
+  });
+
+export { getEquipmentList, createEquipment, createBooking, loginUser, registerUser, deleteEquipment, rateEquipment, createBatchBookings, createPaymentOrder, verifyPayment };
 

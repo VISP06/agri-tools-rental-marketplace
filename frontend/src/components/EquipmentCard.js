@@ -36,7 +36,9 @@ const equipmentCard = (equipment, loggedInUserId = "") => {
         <span class="rounded-lg bg-slate-200 px-3 py-2 text-xs font-semibold text-slate-600">Your Listing</span>
         <button class="delete-equipment rounded-lg bg-red-500 px-3 py-2 text-xs font-semibold text-white hover:bg-red-600 transition-colors" data-delete-equipment="${equipment._id}">Delete</button>
       </div>`
-    : `<button class="book-equipment rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700" data-book-equipment="${equipment._id}">Book Now</button>`;
+    : `<button class="book-equipment rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700" data-book-equipment="${equipment._id}">
+        <svg class="h-4 w-4 inline mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"/></svg>Add to Cart
+      </button>`;
   return `
   <article class="view-equipment rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden cursor-pointer hover:shadow-md transition-shadow" data-view-equipment="${equipment._id}">
     ${image ? `<img src="${image}" alt="${escapeHtml(equipment.name)}" class="h-44 w-full object-cover" />` : `<div class="flex h-44 w-full items-center justify-center bg-slate-100"><svg class="h-12 w-12 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0022.5 18.75V5.25A2.25 2.25 0 0020.25 3H3.75A2.25 2.25 0 001.5 5.25v13.5A2.25 2.25 0 003.75 21z"/></svg></div>`}

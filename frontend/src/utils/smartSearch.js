@@ -92,6 +92,26 @@ const buildSuggestionPool = (equipment) => {
 };
 
 /**
+ * Build a unique list of location suggestions from equipment data.
+ * Extracts full locations AND individual parts (district, state).
+ */
+const buildLocationPool = (equipment) => {
+  const set = new Set();
+  for (const item of equipment) {
+    if (!item.location) continue;
+    const loc = item.location.trim();
+    if (loc) set.add(loc);
+    // Split by comma to extract district and state individually
+    const parts = loc.split(/\s*,\s*/);
+    for (const part of parts) {
+      const p = part.trim();
+      if (p) set.add(p);
+    }
+  }
+  return Array.from(set);
+};
+
+/**
  * Get ranked suggestions for a query.
  */
 const getSuggestions = (query, pool, maxResults = 7) => {
@@ -262,4 +282,129 @@ const initSmartSearch = (inputEl, equipment) => {
   });
 };
 
-export { initSmartSearch };
+/**
+ * Initialize location autocomplete on a given input element.
+ * Suggests districts, states, and full locations from equipment data.
+ *
+ * @param {HTMLInputElement} inputEl - the location input
+ * @param {Array} equipment - the equipment array from state
+ */
+const initLocationSearch = (inputEl, equipment) => {
+  if (!inputEl) return;
+
+  const pool = buildLocationPool(equipment);
+
+  const dropdown = document.createElement("div");
+  dropdown.className = "smart-search-dropdown";
+  dropdown.setAttribute("role", "listbox");
+
+  // Ensure parent is positioned for the absolute dropdown
+  if (inputEl.parentElement && getComputedStyle(inputEl.parentElement).position === "static") {
+    inputEl.parentElement.style.position = "relative";
+  }
+  inputEl.parentElement.appendChild(dropdown);
+  inputEl.setAttribute("autocomplete", "off");
+  inputEl.setAttribute("role", "combobox");
+  inputEl.setAttribute("aria-expanded", "false");
+
+  let activeIndex = -1;
+  let currentResults = [];
+  let debounceTimer = null;
+
+  const close = () => {
+    dropdown.innerHTML = "";
+    dropdown.classList.remove("open");
+    inputEl.setAttribute("aria-expanded", "false");
+    activeIndex = -1;
+    currentResults = [];
+  };
+
+  const selectItem = (text) => {
+    inputEl.value = text;
+    close();
+    inputEl.focus();
+  };
+
+  const renderDropdown = () => {
+    const query = inputEl.value;
+    currentResults = getSuggestions(query, pool);
+
+    if (currentResults.length === 0) {
+      close();
+      return;
+    }
+
+    activeIndex = -1;
+    inputEl.setAttribute("aria-expanded", "true");
+    dropdown.classList.add("open");
+    dropdown.innerHTML = currentResults
+      .map(
+        (r, i) =>
+          `<div class="smart-search-item" role="option" data-index="${i}">
+            <svg class="smart-search-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+            <span>${highlightMatch(r.text, query)}</span>
+          </div>`
+      )
+      .join("");
+  };
+
+  const updateActive = () => {
+    const items = dropdown.querySelectorAll(".smart-search-item");
+    items.forEach((el, i) => {
+      el.classList.toggle("active", i === activeIndex);
+    });
+    if (activeIndex >= 0 && items[activeIndex]) {
+      items[activeIndex].scrollIntoView({ block: "nearest" });
+    }
+  };
+
+  inputEl.addEventListener("input", () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(renderDropdown, 150);
+  });
+
+  inputEl.addEventListener("keydown", (e) => {
+    if (!currentResults.length) return;
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      activeIndex = (activeIndex + 1) % currentResults.length;
+      updateActive();
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      activeIndex = activeIndex <= 0 ? currentResults.length - 1 : activeIndex - 1;
+      updateActive();
+    } else if (e.key === "Enter" && activeIndex >= 0) {
+      e.preventDefault();
+      selectItem(currentResults[activeIndex].text);
+    } else if (e.key === "Escape") {
+      close();
+    }
+  });
+
+  dropdown.addEventListener("mousedown", (e) => {
+    e.preventDefault();
+    const item = e.target.closest(".smart-search-item");
+    if (item) {
+      const idx = Number(item.dataset.index);
+      selectItem(currentResults[idx].text);
+    }
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!inputEl.contains(e.target) && !dropdown.contains(e.target)) {
+      close();
+    }
+  });
+
+  inputEl.addEventListener("focus", () => {
+    if (inputEl.value.trim().length > 0) {
+      renderDropdown();
+    }
+  });
+};
+
+export { initSmartSearch, initLocationSearch };

@@ -41,6 +41,7 @@ const initDatabase = () => {
       renterPhone TEXT NOT NULL,
       startDate TEXT NOT NULL,
       endDate TEXT NOT NULL,
+      quantity INTEGER DEFAULT 1,
       totalPrice REAL DEFAULT 0,
       status TEXT DEFAULT 'requested',
       paymentStatus TEXT DEFAULT 'pending',
@@ -59,6 +60,21 @@ const initDatabase = () => {
       UNIQUE(equipmentId, userId)
     );
   `);
+
+  // Migration: add quantity column if missing (for existing databases)
+  try {
+    db.exec("ALTER TABLE bookings ADD COLUMN quantity INTEGER DEFAULT 1");
+  } catch (e) {
+    // Column already exists, ignore
+  }
+
+  try {
+    db.exec("ALTER TABLE bookings ADD COLUMN razorpayOrderId TEXT DEFAULT ''");
+  } catch (e) {}
+
+  try {
+    db.exec("ALTER TABLE bookings ADD COLUMN razorpayPaymentId TEXT DEFAULT ''");
+  } catch (e) {}
 
   return db;
 };

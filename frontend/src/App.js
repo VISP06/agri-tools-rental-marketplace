@@ -9,9 +9,12 @@ import { loginPage } from "./pages/LoginPage.js";
 import { registerPage } from "./pages/RegisterPage.js";
 import { profilePage } from "./pages/ProfilePage.js";
 import { equipmentDetailPage } from "./pages/EquipmentDetailPage.js";
+import { cartPage } from "./pages/CartPage.js";
+import { paymentPage, initPaymentMethods } from "./pages/PaymentPage.js";
+import { bookingConfirmationPage } from "./pages/BookingConfirmationPage.js";
 
-import { getEquipmentList, createEquipment, createBooking, loginUser, registerUser, deleteEquipment, rateEquipment } from "./services/api.js";
-import { initSmartSearch } from "./utils/smartSearch.js";
+import { getEquipmentList, createEquipment, createBooking, loginUser, registerUser, deleteEquipment, rateEquipment, createBatchBookings, createPaymentOrder, verifyPayment } from "./services/api.js";
+import { initSmartSearch, initLocationSearch } from "./utils/smartSearch.js";
 import { initCategoryDropdowns } from "./components/CategoryDropdown.js";
 
 
@@ -28,11 +31,19 @@ const initApp = (rootElement) => {
     error: "",
     loggedInUser: localStorage.getItem("agrirent_user_id") || "",
     selectedEquipmentId: null,
-    searchQuery: { search: "", location: "", category: "" }
+    searchQuery: { search: "", location: "", category: "" },
+    cart: JSON.parse(localStorage.getItem("agrirent_cart") || "[]"),
+    renterName: "",
+    renterPhone: "",
+    confirmedBookings: [],
+    paymentId: ""
   };
 
   const setState = (patch) => {
     Object.assign(state, patch);
+    if (patch.cart !== undefined) {
+      localStorage.setItem("agrirent_cart", JSON.stringify(state.cart));
+    }
     render();
   };
 
@@ -47,33 +58,268 @@ const initApp = (rootElement) => {
     }
   };
 
-  const submitBooking = async (equipmentId) => {
-    const renterName = window.prompt("Renter name");
+  const showToast = (message, type = "success") => {
+    const existingToast = document.getElementById("toast-notification");
+    if (existingToast) existingToast.remove();
+
+    const toast = document.createElement("div");
+    toast.id = "toast-notification";
+    toast.className = `toast-notification toast-${type}`;
+    toast.innerHTML = `<span>${message}</span>`;
+    document.body.appendChild(toast);
+
+    requestAnimationFrame(() => toast.classList.add("toast-visible"));
+
+    setTimeout(() => {
+      toast.classList.remove("toast-visible");
+      setTimeout(() => toast.remove(), 300);
+    }, 2500);
+  };
+
+  const addToCart = (equipmentId) => {
+    if (!state.loggedInUser) {
+      showToast("Please login to add items to cart", "error");
+      navigateTo("login");
+      return;
+    }
+    const exists = state.cart.some((item) => String(item.equipmentId) === String(equipmentId));
+    if (exists) {
+      showToast("Already in cart");
+      return;
+    }
+    const today = new Date().toISOString().split("T")[0];
+    setState({
+      cart: [...state.cart, { equipmentId: String(equipmentId), startDate: today, numberOfDays: 1 }]
+    });
+    showToast("Added to cart");
+  };
+
+  const removeFromCart = (equipmentId) => {
+    setState({ cart: state.cart.filter((item) => String(item.equipmentId) !== String(equipmentId)) });
+    showToast("Removed from cart");
+  };
+
+  const updateCartItem = (equipmentId, field, value) => {
+    const updatedCart = state.cart.map((item) => {
+      if (String(item.equipmentId) === String(equipmentId)) {
+        return { ...item, [field]: value };
+      }
+      return item;
+    });
+    setState({ cart: updatedCart });
+  };
+
+  const clearCart = () => {
+    setState({ cart: [] });
+    showToast("Cart cleared");
+  };
+
+  const handleCheckout = async () => {
+    if (state.cart.length === 0) {
+      showToast("Your cart is empty", "error");
+      return;
+    }
+
+    const renterName = document.getElementById("checkout-renter-name")?.value?.trim();
+    const renterPhone = document.getElementById("checkout-renter-phone")?.value?.trim();
+
     if (!renterName) {
+      showToast("Please enter your name", "error");
       return;
     }
-
-    const renterPhone = window.prompt("Renter phone number");
     if (!renterPhone) {
+      showToast("Please enter your phone number", "error");
       return;
     }
 
-    const startDate = window.prompt("Rental start date (YYYY-MM-DD)");
-    if (!startDate) {
-      return;
+    for (const item of state.cart) {
+      if (!item.startDate) {
+        const eq = state.equipment.find((e) => String(e._id) === String(item.equipmentId));
+        showToast(`Please set a start date for ${eq?.name || "an item"}`, "error");
+        return;
+      }
     }
 
-    const endDate = window.prompt("Rental end date (YYYY-MM-DD)");
-    if (!endDate) {
-      return;
+    // Save renter details and navigate to payment page
+    const nextHist = [...state.history, state.activePage];
+    setState({ renterName, renterPhone, history: nextHist, activePage: "payment" });
+    window.history.pushState({ page: "payment", history: [...nextHist] }, "", "#payment");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handlePayNow = async () => {
+    const bookings = state.cart.map((item) => {
+      const eq = state.equipment.find((e) => String(e._id) === String(item.equipmentId));
+      const dailyRate = eq?.dailyRate || 0;
+      const numberOfDays = item.numberOfDays || 1;
+      const totalPrice = dailyRate * numberOfDays;
+
+      const start = new Date(item.startDate);
+      start.setDate(start.getDate() + numberOfDays);
+      const endDate = start.toISOString().split("T")[0];
+
+      return {
+        equipmentId: item.equipmentId,
+        renterName: state.renterName,
+        renterPhone: state.renterPhone,
+        startDate: item.startDate,
+        endDate,
+        quantity: 1,
+        totalPrice,
+        numberOfDays
+      };
+    });
+
+    const totalAmount = bookings.reduce((sum, b) => sum + b.totalPrice, 0);
+
+    // Show loading state on button
+    const payBtn = document.getElementById("payment-pay-btn");
+    if (payBtn) {
+      payBtn.disabled = true;
+      payBtn.innerHTML = `<svg class="h-5 w-5 inline mr-2 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>Processing...`;
     }
 
     try {
-      await createBooking({ equipmentId, renterName, renterPhone, startDate, endDate });
-      window.alert("Booking request submitted.");
+      // Step 1: Create Razorpay order on backend
+      const orderRes = await createPaymentOrder({
+        amount: totalAmount,
+        currency: "INR",
+        bookings,
+        receipt: `agrirent_${Date.now()}`
+      });
+
+      const { orderId, amount, currency, keyId } = orderRes.data;
+
+      // Step 2: Open Razorpay checkout popup
+      const rzpOptions = {
+        key: keyId,
+        amount: amount,
+        currency: currency,
+        name: "AgriRent",
+        description: `Rental of ${bookings.length} equipment${bookings.length > 1 ? "s" : ""}`,
+        order_id: orderId,
+        handler: async (response) => {
+          try {
+            // Step 3: Verify payment on backend
+            const verifyRes = await verifyPayment({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              bookings
+            });
+
+            // Step 4: Navigate to confirmation page
+            const nextHist = [...state.history, state.activePage];
+            setState({
+              cart: [],
+              confirmedBookings: bookings,
+              paymentId: response.razorpay_payment_id,
+              history: nextHist,
+              activePage: "booking-confirmation"
+            });
+            window.history.pushState({ page: "booking-confirmation", history: [...nextHist] }, "", "#booking-confirmation");
+            window.scrollTo({ top: 0, behavior: "smooth" });
+            showToast("Payment successful! Bookings confirmed.");
+          } catch (verifyError) {
+            showToast(`Payment verification failed: ${verifyError.message}`, "error");
+            // Re-enable button
+            if (payBtn) {
+              payBtn.disabled = false;
+              payBtn.innerHTML = `<svg class="h-5 w-5 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>Pay Rs ${totalAmount.toLocaleString("en-IN")}`;
+            }
+          }
+        },
+        prefill: {
+          name: state.renterName,
+          contact: state.renterPhone
+        },
+        theme: {
+          color: "#059669"
+        },
+        modal: {
+          ondismiss: () => {
+            showToast("Payment cancelled", "error");
+            if (payBtn) {
+              payBtn.disabled = false;
+              payBtn.innerHTML = `<svg class="h-5 w-5 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>Pay Rs ${totalAmount.toLocaleString("en-IN")}`;
+            }
+          }
+        }
+      };
+
+      const rzp = new window.Razorpay(rzpOptions);
+      rzp.on("payment.failed", (response) => {
+        showToast(`Payment failed: ${response.error.description}`, "error");
+        if (payBtn) {
+          payBtn.disabled = false;
+          payBtn.innerHTML = `<svg class="h-5 w-5 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>Pay Rs ${totalAmount.toLocaleString("en-IN")}`;
+        }
+      });
+      rzp.open();
     } catch (error) {
-      window.alert(`Booking failed: ${error.message}`);
+      showToast(`Could not initiate payment: ${error.message}`, "error");
+      if (payBtn) {
+        payBtn.disabled = false;
+        payBtn.innerHTML = `<svg class="h-5 w-5 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>Pay Rs ${totalAmount.toLocaleString("en-IN")}`;
+      }
     }
+  };
+
+  const handleDownloadInvoice = () => {
+    const bookings = state.confirmedBookings || [];
+    let grandTotal = 0;
+    const rows = bookings.map((b, i) => {
+      const eq = state.equipment.find((e) => String(e._id) === String(b.equipmentId));
+      const name = eq?.name || "Equipment";
+      const days = b.numberOfDays || 1;
+      const rate = eq?.dailyRate || 0;
+      const subtotal = b.totalPrice || rate * days;
+      grandTotal += subtotal;
+      return `<tr>
+        <td style="border:1px solid #e2e8f0;padding:8px 12px;text-align:center">${i + 1}</td>
+        <td style="border:1px solid #e2e8f0;padding:8px 12px">${name}</td>
+        <td style="border:1px solid #e2e8f0;padding:8px 12px;text-align:center">${b.startDate}</td>
+        <td style="border:1px solid #e2e8f0;padding:8px 12px;text-align:center">${b.endDate}</td>
+        <td style="border:1px solid #e2e8f0;padding:8px 12px;text-align:center">${days}</td>
+        <td style="border:1px solid #e2e8f0;padding:8px 12px;text-align:right">Rs ${rate.toLocaleString("en-IN")}</td>
+        <td style="border:1px solid #e2e8f0;padding:8px 12px;text-align:right;font-weight:600">Rs ${subtotal.toLocaleString("en-IN")}</td>
+      </tr>`;
+    }).join("");
+
+    const invoiceHTML = `<!DOCTYPE html><html><head><title>AgriRent Invoice</title>
+      <style>body{font-family:Inter,sans-serif;padding:40px;color:#1e293b}
+      table{width:100%;border-collapse:collapse;margin:20px 0}
+      th{background:#059669;color:#fff;padding:10px 12px;text-align:left;font-size:13px}
+      td{font-size:13px}
+      @media print{body{padding:20px}}</style></head>
+      <body>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:30px">
+          <div><h1 style="color:#059669;margin:0;font-size:28px">AgriRent</h1><p style="color:#64748b;margin:4px 0 0;font-size:13px">Farm Equipment Rental Marketplace</p></div>
+          <div style="text-align:right"><h2 style="margin:0;font-size:20px;color:#1e293b">INVOICE</h2><p style="color:#64748b;margin:4px 0 0;font-size:13px">Date: ${new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}</p>
+          ${state.paymentId ? `<p style="color:#64748b;margin:2px 0 0;font-size:12px">Payment ID: ${state.paymentId}</p>` : ""}</div>
+        </div>
+        <div style="background:#f8fafc;border-radius:8px;padding:16px;margin-bottom:24px">
+          <p style="margin:0;font-size:13px"><strong>Renter:</strong> ${state.renterName}</p>
+          <p style="margin:4px 0 0;font-size:13px"><strong>Phone:</strong> ${state.renterPhone}</p>
+        </div>
+        <table>
+          <thead><tr>
+            <th style="text-align:center">#</th><th>Equipment</th><th style="text-align:center">Start Date</th><th style="text-align:center">End Date</th><th style="text-align:center">Days</th><th style="text-align:right">Rate/Day</th><th style="text-align:right">Subtotal</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+          <tfoot><tr>
+            <td colspan="6" style="border:1px solid #e2e8f0;padding:10px 12px;text-align:right;font-weight:700;font-size:14px">Grand Total</td>
+            <td style="border:1px solid #e2e8f0;padding:10px 12px;text-align:right;font-weight:700;font-size:14px;color:#059669">Rs ${grandTotal.toLocaleString("en-IN")}</td>
+          </tr></tfoot>
+        </table>
+        <p style="text-align:center;color:#94a3b8;font-size:12px;margin-top:32px">Thank you for choosing AgriRent!</p>
+      </body></html>`;
+
+    const invoiceWindow = window.open("", "_blank");
+    invoiceWindow.document.write(invoiceHTML);
+    invoiceWindow.document.close();
+    invoiceWindow.focus();
+    invoiceWindow.print();
   };
 
   const handleDeleteEquipment = async (equipmentId) => {
@@ -94,6 +340,11 @@ const initApp = (rootElement) => {
 
   const handleEquipmentSubmit = async (event) => {
     event.preventDefault();
+    if (!state.loggedInUser) {
+      showToast("Please login to list equipment", "error");
+      navigateTo("login");
+      return;
+    }
     const formData = new FormData(event.target);
 
     const imageFile = formData.get("image");
@@ -161,7 +412,8 @@ const initApp = (rootElement) => {
 
   const handleLogout = () => {
     localStorage.removeItem("agrirent_user_id");
-    setState({ loggedInUser: "", activePage: "home" });
+    localStorage.removeItem("agrirent_cart");
+    setState({ loggedInUser: "", activePage: "home", cart: [] });
     window.history.pushState({ page: "home", history: [] }, "", "#home");
   };
 
@@ -197,9 +449,8 @@ const initApp = (rootElement) => {
 
 
     const nextHist2 = [...state.history, state.activePage];
-    setState({ history: nextHist2, activePage: "marketplace", loading: true, error: "" });
+    setState({ history: nextHist2, activePage: "marketplace", loading: true, error: "", searchQuery: { search, location, category } });
     window.history.pushState({ page: "marketplace", history: [...nextHist2] }, "", "#marketplace");
-
 
     try {
       const result = await getEquipmentList(query);
@@ -272,6 +523,9 @@ const initApp = (rootElement) => {
     "nav-contact-mobile": "contact",
     "nav-list-equipment-link": "list-equipment",
     "nav-list-equipment-mobile": "list-equipment",
+    "nav-cart-link": "cart",
+    "nav-cart-mobile": "cart",
+    "cart-browse-equipment": "marketplace",
     "nav-login-link": "login",
     "nav-profile": "profile",
     "profile-goto-list": "list-equipment",
@@ -284,7 +538,8 @@ const initApp = (rootElement) => {
     "hero-list": "list-equipment",
     "cta-list-equipment": "list-equipment",
     "view-all-equipment": "marketplace",
-    "view-all-equipment-bottom": "marketplace"
+    "view-all-equipment-bottom": "marketplace",
+    "confirmation-browse-more": "marketplace"
   };
 
   // Use event delegation on the root element for reliable navigation
@@ -305,7 +560,13 @@ const initApp = (rootElement) => {
       return;
     }
     if (navMap[target.id]) {
-      navigateTo(navMap[target.id]);
+      const page = navMap[target.id];
+      if ((page === "list-equipment" || page === "cart") && !state.loggedInUser) {
+        showToast("Please login first", "error");
+        navigateTo("login");
+        return;
+      }
+      navigateTo(page);
     }
   });
 
@@ -346,9 +607,13 @@ const initApp = (rootElement) => {
       const homeSearchInput = document.getElementById("smart-search-input-home");
       if (homeSearchInput) initSmartSearch(homeSearchInput, state.equipment);
 
+      // Location autocomplete on home
+      const homeLocationInput = document.getElementById("location-search-input-home");
+      if (homeLocationInput) initLocationSearch(homeLocationInput, state.equipment);
+
       // Book buttons
       document.querySelectorAll(".book-equipment").forEach((button) => {
-        button.addEventListener("click", () => submitBooking(button.dataset.bookEquipment));
+        button.addEventListener("click", () => addToCart(button.dataset.bookEquipment));
       });
 
       // Delete buttons
@@ -359,7 +624,7 @@ const initApp = (rootElement) => {
 
     if (state.activePage === "marketplace") {
       document.querySelectorAll(".book-equipment").forEach((button) => {
-        button.addEventListener("click", () => submitBooking(button.dataset.bookEquipment));
+        button.addEventListener("click", () => addToCart(button.dataset.bookEquipment));
       });
 
       document.querySelectorAll(".delete-equipment").forEach((button) => {
@@ -375,6 +640,10 @@ const initApp = (rootElement) => {
       // Smart search autocomplete on marketplace
       const marketplaceSearchInput = document.getElementById("smart-search-input");
       if (marketplaceSearchInput) initSmartSearch(marketplaceSearchInput, state.equipment);
+
+      // Location autocomplete on marketplace
+      const marketplaceLocationInput = document.getElementById("location-search-input");
+      if (marketplaceLocationInput) initLocationSearch(marketplaceLocationInput, state.equipment);
     }
 
     if (state.activePage === "list-equipment") {
@@ -403,7 +672,14 @@ const initApp = (rootElement) => {
       if (form) form.addEventListener("submit", handleContactSubmit);
 
       const partnerBtn = document.getElementById("contact-become-partner");
-      if (partnerBtn) partnerBtn.addEventListener("click", () => navigateTo("list-equipment"));
+      if (partnerBtn) partnerBtn.addEventListener("click", () => {
+        if (!state.loggedInUser) {
+          showToast("Please login first", "error");
+          navigateTo("login");
+        } else {
+          navigateTo("list-equipment");
+        }
+      });
     }
 
     if (state.activePage === "login") {
@@ -433,7 +709,7 @@ const initApp = (rootElement) => {
       if (backBtn) backBtn.addEventListener("click", goBack);
 
       document.querySelectorAll(".book-equipment").forEach((button) => {
-        button.addEventListener("click", () => submitBooking(button.dataset.bookEquipment));
+        button.addEventListener("click", () => addToCart(button.dataset.bookEquipment));
       });
 
       document.querySelectorAll(".delete-equipment").forEach((button) => {
@@ -455,12 +731,52 @@ const initApp = (rootElement) => {
 
     if (state.activePage === "profile") {
       document.querySelectorAll(".book-equipment").forEach((button) => {
-        button.addEventListener("click", () => submitBooking(button.dataset.bookEquipment));
+        button.addEventListener("click", () => addToCart(button.dataset.bookEquipment));
       });
 
       document.querySelectorAll(".delete-equipment").forEach((button) => {
         button.addEventListener("click", () => handleDeleteEquipment(button.dataset.deleteEquipment));
       });
+    }
+
+    if (state.activePage === "cart") {
+      document.querySelectorAll(".cart-remove-item").forEach((button) => {
+        button.addEventListener("click", () => removeFromCart(button.dataset.equipmentId));
+      });
+
+      document.querySelectorAll(".cart-start-date").forEach((input) => {
+        input.addEventListener("change", (e) => {
+          updateCartItem(input.dataset.equipmentId, "startDate", e.target.value);
+        });
+      });
+
+      document.querySelectorAll(".cart-days").forEach((input) => {
+        input.addEventListener("change", (e) => {
+          const val = Math.max(1, Math.min(365, parseInt(e.target.value) || 1));
+          updateCartItem(input.dataset.equipmentId, "numberOfDays", val);
+        });
+      });
+
+      const clearBtn = document.getElementById("cart-clear-all");
+      if (clearBtn) clearBtn.addEventListener("click", clearCart);
+
+      const checkoutBtn = document.getElementById("cart-checkout-btn");
+      if (checkoutBtn) checkoutBtn.addEventListener("click", handleCheckout);
+    }
+
+    if (state.activePage === "payment") {
+      const payBtn = document.getElementById("payment-pay-btn");
+      if (payBtn) payBtn.addEventListener("click", handlePayNow);
+
+      const cancelBtn = document.getElementById("payment-cancel-btn");
+      if (cancelBtn) cancelBtn.addEventListener("click", goBack);
+
+      initPaymentMethods();
+    }
+
+    if (state.activePage === "booking-confirmation") {
+      const downloadBtn = document.getElementById("confirmation-download-invoice");
+      if (downloadBtn) downloadBtn.addEventListener("click", handleDownloadInvoice);
     }
   };
 
@@ -484,6 +800,12 @@ const initApp = (rootElement) => {
       }
       case "profile":
         return profilePage({ loggedInUser: state.loggedInUser, equipment: state.equipment });
+      case "cart":
+        return cartPage({ cart: state.cart, equipment: state.equipment, loggedInUser: state.loggedInUser });
+      case "payment":
+        return paymentPage({ cart: state.cart, equipment: state.equipment, renterName: state.renterName, renterPhone: state.renterPhone });
+      case "booking-confirmation":
+        return bookingConfirmationPage({ confirmedBookings: state.confirmedBookings, paymentId: state.paymentId, equipment: state.equipment, renterName: state.renterName, renterPhone: state.renterPhone });
       case "home":
       default:
         return homePage({ loading: state.loading, error: state.error, equipment: state.equipment, loggedInUser: state.loggedInUser });
@@ -495,7 +817,7 @@ const initApp = (rootElement) => {
     const showNavFooter = !["login", "register"].includes(state.activePage);
 
     rootElement.innerHTML = `
-      ${showNavFooter ? navbar(state.activePage, state.loggedInUser) : ""}
+      ${showNavFooter ? navbar(state.activePage, state.loggedInUser, state.cart.length) : ""}
       <div class="mx-auto min-h-screen max-w-7xl px-4 py-6 md:px-6">
         <main>${pageMarkup}</main>
       </div>

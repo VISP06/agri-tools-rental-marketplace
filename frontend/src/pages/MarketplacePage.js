@@ -61,13 +61,16 @@ const marketplacePage = ({ loading, error, equipment, loggedInUser, searchQuery 
             class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
           />
         </div>
-        <input
-          type="text"
-          name="location"
-          value="${escapeAttr(sq.location)}"
-          placeholder="Location..."
-          class="rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
-        />
+        <div class="relative">
+          <input
+            type="text"
+            id="location-search-input"
+            name="location"
+            value="${escapeAttr(sq.location)}"
+            placeholder="Location..."
+            class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+          />
+        </div>
         ${categoryDropdown("category", searchCategories, "All Categories", sq.category)}
         <button type="submit" class="rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 transition-colors">
           Search
