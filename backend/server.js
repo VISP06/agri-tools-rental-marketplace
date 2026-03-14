@@ -44,6 +44,10 @@ app.use(errorHandler);
 initDatabase();
 console.log("SQLite database initialized (drive.db)");
 
-app.listen(PORT, () => {
-  console.log(`Backend running on http://localhost:${PORT}`);
-});
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`Backend running on http://localhost:${PORT}`);
+  });
+}
+
+module.exports = app;
