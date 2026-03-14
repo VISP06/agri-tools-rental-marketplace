@@ -29,11 +29,12 @@ app.use("/api/users", userRoutes);
 const frontendPath = path.join(__dirname, "..", "frontend");
 app.use("/src", express.static(path.join(frontendPath, "src")));
 app.use(express.static(path.join(frontendPath, "public")));
+app.use(express.static(frontendPath));
 
 // SPA fallback: serve index.html for all non-API routes
 app.get("*", (req, res, next) => {
   if (req.path.startsWith("/api")) return next();
-  res.sendFile(path.join(frontendPath, "public", "index.html"));
+  res.sendFile(path.join(frontendPath, "index.html"));
 });
 
 app.use(notFound);

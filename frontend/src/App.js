@@ -13,7 +13,7 @@ import { cartPage } from "./pages/CartPage.js";
 import { paymentPage, initPaymentMethods } from "./pages/PaymentPage.js";
 import { bookingConfirmationPage } from "./pages/BookingConfirmationPage.js";
 
-import { getEquipmentList, createEquipment, createBooking, loginUser, registerUser, deleteEquipment, rateEquipment, createBatchBookings, getMyBookings } from "./services/api.js";
+import { API_BASE_URL, getEquipmentList, createEquipment, createBooking, loginUser, registerUser, deleteEquipment, rateEquipment, createBatchBookings, getMyBookings } from "./services/api.js";
 import { initSmartSearch } from "./utils/smartSearch.js";
 import { initLocationSearch } from "./utils/locationSearch.js";
 import { initCategoryDropdowns } from "./components/CategoryDropdown.js";
@@ -819,7 +819,7 @@ const initApp = (rootElement) => {
 
         // Reverse geocode to get city name
         try {
-          const res = await fetch(`/api/equipment/reverse-geocode?lat=${lat}&lng=${lng}`);
+          const res = await fetch(`${API_BASE_URL}/equipment/reverse-geocode?lat=${lat}&lng=${lng}`);
           const payload = await res.json();
           if (payload.success && payload.data.display_name) {
             state.userCity = payload.data.display_name;

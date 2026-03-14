@@ -77,5 +77,5 @@ const createBatchBookings = async (bookings) =>
 const getMyBookings = async (renterId) =>
   request(`/bookings?renterId=${encodeURIComponent(renterId)}`);
 
-export { getEquipmentList, createEquipment, createBooking, loginUser, registerUser, deleteEquipment, rateEquipment, createBatchBookings, getMyBookings };
+export { API_BASE_URL, getEquipmentList, createEquipment, createBooking, loginUser, registerUser, deleteEquipment, rateEquipment, createBatchBookings, getMyBookings };
 
