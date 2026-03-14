@@ -44,7 +44,7 @@ const equipmentCard = (equipment, loggedInUserId = "") => {
       <div class="flex items-start justify-between gap-4">
         <div>
           <h3 class="text-lg font-semibold text-slate-900">${escapeHtml(equipment.name)}</h3>
-          <p class="text-sm text-slate-500">${escapeHtml(equipment.category)} • ${escapeHtml(equipment.location)}</p>
+          <p class="text-sm text-slate-500">${escapeHtml(equipment.category)} • ${escapeHtml(equipment.location)}${equipment.distance != null ? ` • <span class="font-medium text-emerald-600">${equipment.distance} km away</span>` : ""}</p>
         </div>
         <span class="rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-700">Available</span>
       </div>

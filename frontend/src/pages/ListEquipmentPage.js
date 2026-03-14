@@ -36,10 +36,12 @@ const listEquipmentPage = () => `
           ${categoryDropdown("category", listCategories, "Select a category")}
         </div>
 
-        <label class="flex flex-col gap-2 text-sm">
+        <div class="flex flex-col gap-2 text-sm">
           <span class="font-medium text-slate-700">Location</span>
-          <input class="rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20" name="location" placeholder="District, State" required />
-        </label>
+          <div class="relative">
+            <input class="w-full rounded-lg border border-slate-300 px-3 py-2.5 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20" id="location-search-input-list" name="location" placeholder="District, State" required />
+          </div>
+        </div>
 
         <label class="flex flex-col gap-2 text-sm">
           <span class="font-medium text-slate-700">Equipment Image</span>

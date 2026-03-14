@@ -55,10 +55,11 @@ const homePage = ({ loading, error, equipment, loggedInUser }) => {
               class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
             />
           </div>
-          <div>
+          <div class="relative">
             <label class="text-xs font-medium text-slate-500">Location</label>
             <input
               type="text"
+              id="location-search-input-home"
               name="location"
               placeholder="District, State..."
               class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"

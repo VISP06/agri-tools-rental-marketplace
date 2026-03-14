@@ -60,7 +60,46 @@ const initDatabase = () => {
     );
   `);
 
+  // Migration: add latitude/longitude columns if they don't exist
+  const columns = db.prepare("PRAGMA table_info(equipment)").all();
+  const colNames = columns.map((c) => c.name);
+  if (!colNames.includes("latitude")) {
+    db.exec("ALTER TABLE equipment ADD COLUMN latitude REAL DEFAULT NULL");
+  }
+  if (!colNames.includes("longitude")) {
+    db.exec("ALTER TABLE equipment ADD COLUMN longitude REAL DEFAULT NULL");
+  }
+
+  // Backfill: geocode existing equipment that lacks coordinates
+  backfillCoordinates();
+
   return db;
+};
+
+const backfillCoordinates = async () => {
+  const rows = db.prepare("SELECT id, location FROM equipment WHERE latitude IS NULL AND longitude IS NULL AND location != ''").all();
+  if (rows.length === 0) return;
+
+  console.log(`Backfilling coordinates for ${rows.length} equipment rows...`);
+  for (const row of rows) {
+    try {
+      const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(row.location)}&format=json&limit=1`;
+      const response = await fetch(url, {
+        headers: { "User-Agent": "AgriRentMarketplace/1.0" }
+      });
+      const data = await response.json();
+      if (data.length > 0) {
+        db.prepare("UPDATE equipment SET latitude = ?, longitude = ? WHERE id = ?")
+          .run(parseFloat(data[0].lat), parseFloat(data[0].lon), row.id);
+        console.log(`  Geocoded "${row.location}" -> (${data[0].lat}, ${data[0].lon})`);
+      }
+      // Respect Nominatim rate limit: 1 request per second
+      await new Promise((resolve) => setTimeout(resolve, 1100));
+    } catch (err) {
+      console.warn(`  Failed to geocode "${row.location}":`, err.message);
+    }
+  }
+  console.log("Backfill complete.");
 };
 
 const getDb = () => {
