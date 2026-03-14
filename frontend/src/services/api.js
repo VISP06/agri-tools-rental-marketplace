@@ -1,4 +1,4 @@
-const API_BASE_URL = "http://localhost:5000/api";
+const API_BASE_URL = window.location.hostname === "localhost" ? "http://localhost:5000/api" : "/api";
 
 const request = async (path, options = {}) => {
   const response = await fetch(`${API_BASE_URL}${path}`, {
@@ -74,17 +74,5 @@ const createBatchBookings = async (bookings) =>
     body: JSON.stringify({ bookings })
   });
 
-const createPaymentOrder = async (orderData) =>
-  request("/payments/create-order", {
-    method: "POST",
-    body: JSON.stringify(orderData)
-  });
-
-const verifyPayment = async (paymentData) =>
-  request("/payments/verify", {
-    method: "POST",
-    body: JSON.stringify(paymentData)
-  });
-
-export { getEquipmentList, createEquipment, createBooking, loginUser, registerUser, deleteEquipment, rateEquipment, createBatchBookings, createPaymentOrder, verifyPayment };
+export { getEquipmentList, createEquipment, createBooking, loginUser, registerUser, deleteEquipment, rateEquipment, createBatchBookings };
 

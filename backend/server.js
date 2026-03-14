@@ -8,7 +8,6 @@ const equipmentRoutes = require("./routes/equipmentRoutes");
 const bookingRoutes = require("./routes/bookingRoutes");
 const userRoutes = require("./routes/userRoutes");
 const healthRoutes = require("./routes/healthRoutes");
-const paymentRoutes = require("./routes/paymentRoutes");
 const notFound = require("./middleware/notFound");
 const errorHandler = require("./middleware/errorHandler");
 
@@ -24,7 +23,6 @@ app.use("/api/health", healthRoutes);
 app.use("/api/equipment", equipmentRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api/users", userRoutes);
-app.use("/api/payments", paymentRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

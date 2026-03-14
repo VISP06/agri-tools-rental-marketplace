@@ -13,7 +13,7 @@ import { cartPage } from "./pages/CartPage.js";
 import { paymentPage, initPaymentMethods } from "./pages/PaymentPage.js";
 import { bookingConfirmationPage } from "./pages/BookingConfirmationPage.js";
 
-import { getEquipmentList, createEquipment, createBooking, loginUser, registerUser, deleteEquipment, rateEquipment, createBatchBookings, createPaymentOrder, verifyPayment } from "./services/api.js";
+import { getEquipmentList, createEquipment, createBooking, loginUser, registerUser, deleteEquipment, rateEquipment, createBatchBookings } from "./services/api.js";
 import { initSmartSearch } from "./utils/smartSearch.js";
 import { initLocationSearch } from "./utils/locationSearch.js";
 import { initCategoryDropdowns } from "./components/CategoryDropdown.js";
@@ -180,9 +180,6 @@ const initApp = (rootElement) => {
       };
     });
 
-    const totalAmount = bookings.reduce((sum, b) => sum + b.totalPrice, 0);
-
-    // Show loading state on button
     const payBtn = document.getElementById("payment-pay-btn");
     if (payBtn) {
       payBtn.disabled = true;
@@ -190,87 +187,24 @@ const initApp = (rootElement) => {
     }
 
     try {
-      // Step 1: Create Razorpay order on backend
-      const orderRes = await createPaymentOrder({
-        amount: totalAmount,
-        currency: "INR",
-        bookings,
-        receipt: `agrirent_${Date.now()}`
+      await createBatchBookings(bookings);
+
+      const nextHist = [...state.history, state.activePage];
+      setState({
+        cart: [],
+        confirmedBookings: bookings,
+        paymentId: `AGRI-${Date.now()}`,
+        history: nextHist,
+        activePage: "booking-confirmation"
       });
-
-      const { orderId, amount, currency, keyId } = orderRes.data;
-
-      // Step 2: Open Razorpay checkout popup
-      const rzpOptions = {
-        key: keyId,
-        amount: amount,
-        currency: currency,
-        name: "AgriRent",
-        description: `Rental of ${bookings.length} equipment${bookings.length > 1 ? "s" : ""}`,
-        order_id: orderId,
-        handler: async (response) => {
-          try {
-            // Step 3: Verify payment on backend
-            const verifyRes = await verifyPayment({
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_signature: response.razorpay_signature,
-              bookings
-            });
-
-            // Step 4: Navigate to confirmation page
-            const nextHist = [...state.history, state.activePage];
-            setState({
-              cart: [],
-              confirmedBookings: bookings,
-              paymentId: response.razorpay_payment_id,
-              history: nextHist,
-              activePage: "booking-confirmation"
-            });
-            window.history.pushState({ page: "booking-confirmation", history: [...nextHist] }, "", "#booking-confirmation");
-            window.scrollTo({ top: 0, behavior: "smooth" });
-            showToast("Payment successful! Bookings confirmed.");
-          } catch (verifyError) {
-            showToast(`Payment verification failed: ${verifyError.message}`, "error");
-            // Re-enable button
-            if (payBtn) {
-              payBtn.disabled = false;
-              payBtn.innerHTML = `<svg class="h-5 w-5 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>Pay Rs ${totalAmount.toLocaleString("en-IN")}`;
-            }
-          }
-        },
-        prefill: {
-          name: state.renterName,
-          contact: state.renterPhone
-        },
-        theme: {
-          color: "#059669"
-        },
-        modal: {
-          ondismiss: () => {
-            showToast("Payment cancelled", "error");
-            if (payBtn) {
-              payBtn.disabled = false;
-              payBtn.innerHTML = `<svg class="h-5 w-5 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>Pay Rs ${totalAmount.toLocaleString("en-IN")}`;
-            }
-          }
-        }
-      };
-
-      const rzp = new window.Razorpay(rzpOptions);
-      rzp.on("payment.failed", (response) => {
-        showToast(`Payment failed: ${response.error.description}`, "error");
-        if (payBtn) {
-          payBtn.disabled = false;
-          payBtn.innerHTML = `<svg class="h-5 w-5 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>Pay Rs ${totalAmount.toLocaleString("en-IN")}`;
-        }
-      });
-      rzp.open();
+      window.history.pushState({ page: "booking-confirmation", history: [...nextHist] }, "", "#booking-confirmation");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      showToast("Bookings confirmed successfully!");
     } catch (error) {
-      showToast(`Could not initiate payment: ${error.message}`, "error");
+      showToast(`Booking failed: ${error.message}`, "error");
       if (payBtn) {
         payBtn.disabled = false;
-        payBtn.innerHTML = `<svg class="h-5 w-5 inline mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>Pay Rs ${totalAmount.toLocaleString("en-IN")}`;
+        payBtn.innerHTML = `Confirm & Pay`;
       }
     }
   };
@@ -871,7 +805,7 @@ const initApp = (rootElement) => {
 
         // Reverse geocode to get city name
         try {
-          const res = await fetch(`http://localhost:5000/api/equipment/reverse-geocode?lat=${lat}&lng=${lng}`);
+          const res = await fetch(`/api/equipment/reverse-geocode?lat=${lat}&lng=${lng}`);
           const payload = await res.json();
           if (payload.success && payload.data.display_name) {
             state.userCity = payload.data.display_name;

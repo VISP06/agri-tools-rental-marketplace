@@ -44,7 +44,6 @@ const initDatabase = () => {
       quantity INTEGER DEFAULT 1,
       totalPrice REAL DEFAULT 0,
       status TEXT DEFAULT 'requested',
-      paymentStatus TEXT DEFAULT 'pending',
       createdAt TEXT DEFAULT (datetime('now')),
       updatedAt TEXT DEFAULT (datetime('now')),
       FOREIGN KEY (equipmentId) REFERENCES equipment(id)
@@ -67,14 +66,6 @@ const initDatabase = () => {
   } catch (e) {
     // Column already exists, ignore
   }
-
-  try {
-    db.exec("ALTER TABLE bookings ADD COLUMN razorpayOrderId TEXT DEFAULT ''");
-  } catch (e) {}
-
-  try {
-    db.exec("ALTER TABLE bookings ADD COLUMN razorpayPaymentId TEXT DEFAULT ''");
-  } catch (e) {}
 
   // Migration: add latitude/longitude columns if they don't exist
   const columns = db.prepare("PRAGMA table_info(equipment)").all();
